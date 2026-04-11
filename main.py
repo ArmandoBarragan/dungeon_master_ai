@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import Response
 from src import game_loader
 
-load_game_data = game_loader
+load_game_data = game_loader.load_game()
 
 app = FastAPI()
 

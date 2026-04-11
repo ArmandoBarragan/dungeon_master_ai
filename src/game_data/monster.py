@@ -15,16 +15,3 @@ class Monster:
             "attacks": self.attacks,
         }
     
-    @classmethod
-    def random_monster(cls, path="quest.json"):
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        monster_data = random.choice(data["monsters"])
-
-        return cls(
-            name=monster_data["name"],
-            size=monster_data["size"],
-            behavior=monster_data["behavior"],
-            attacks=monster_data["attacks"],
-        )

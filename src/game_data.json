@@ -65,7 +65,7 @@
       { "name": "Hacha de mano", "damage": "1d6" },
       { "name": "Jabalina", "damage": "1d6" }
     ],
-    "armor": [
+    "armors": [
       { "name": "Cuero", "ac": "11 + Des" },
       { "name": "Camisote de mallas", "ac": "13 + Des (máx 2)" },
       { "name": "Coraza", "ac": "14 + Des (máx 2)" }
