@@ -6,7 +6,7 @@ class Enemy:
         self.species = species
         self._calculate_attributes()
 
-    def _calculate_attributes():
+    def _calculate_attributes(self):
         if self.species.size == "Pequeño":
             self.hp = sum([random.randint(1, 6), random.randint(1, 6)])
             self.constituion = 10 + random.randint(0, 2)

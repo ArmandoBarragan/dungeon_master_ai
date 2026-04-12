@@ -1,7 +1,6 @@
 import random
+from .encounter import Encounter
 
-
-import random
 
 def generate_random_location() -> str:
     """Devuelve un nombre de lugar de fantasía construido a partir de partes seleccionadas."""
@@ -40,9 +39,9 @@ def generate_random_location() -> str:
 
 class Quest:
     def __init__(self, monsters):
-        self.reward = randint(400, 800)
+        self.reward = random.randint(400, 800)
         self.location = generate_random_location()
-        self.generate_encounters()
+        self._generate_encounters(monsters)
 
     def _generate_encounters(self, monsters):
         self.encounters = []
