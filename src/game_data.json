@@ -66,8 +66,8 @@
       { "name": "Jabalina", "damage": "1d6" }
     ],
     "armors": [
-      { "name": "Cuero", "ac": "11 + Des" },
-      { "name": "Camisote de mallas", "ac": "13 + Des (máx 2)" },
-      { "name": "Coraza", "ac": "14 + Des (máx 2)" }
+      { "name": "Cuero", "ac": "11" },
+      { "name": "Camisote de mallas", "ac": "13" },
+      { "name": "Coraza", "ac": "14" }
     ]
   }
