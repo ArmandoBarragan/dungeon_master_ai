@@ -1,15 +1,18 @@
 from fastapi import FastAPI
 from fastapi.responses import Response
-from src import game_loader
-
-load_game_data = game_loader.load_game()
+from src import game_loader, Game
+from src.game_engine import Quest
+game_data = game_loader.load_game()
 
 app = FastAPI()
 
 
 @app.get("/start/")
 async def start():
-    # Generate quest
+    # Generate character
+    # Generate game
+    # Game generates quest
+    new_quest = Quest(game_data.get("monsters"))
     return Response(status_code=204)
 
 

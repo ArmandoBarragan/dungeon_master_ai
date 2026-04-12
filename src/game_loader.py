@@ -14,47 +14,47 @@ def load_game_into_classes(game_data):
     for monster in game_data.get("monsters"): # Redo for races, character classes, weapons, and armors
         monster_instances.append(Monster(
             # Load monsters into Monster class
-            name=monster.name,
-            size=monster.size,
-            behavior=monster.behavior,
-            attacks=monster.attacks,
+            name=monster.get("name"),
+            size=monster.get("size"),
+            behavior=monster.get("behavior"),
+            attacks=monster.get("attacks"),
         ))
 
     armor_instances = []
     for armor in game_data.get("armors"):
         armor_instances.append(Armor(
-            name=armor.name,
-            ac=armor.ac,
+            name=armor.get("name"),
+            ac=armor.get("ac"),
         ))
 
     character_classes_instances = []
     for character_class in game_data.get("character_classes"):
         character_classes_instances.append(CharacterClass(
-            name=character_class.name,
-            hit_die=character_class.hit_die,
-            features=character_class.features,
-            proficiencies=character_class.proficiencies,
+            name=character_class.get("name"),
+            hit_die=character_class.get("hit_die"),
+            features=character_class.get("features"),
+            proficiencies=character_class.get("proficiencies"),
         ))
 
     race_instances = []
     for race in game_data.get("races"):
         race_instances.append(Race(
-            name=race.name,
-            attributes=race.attributes,
-            features=race.features,
+            name=race.get("name"),
+            attributes=race.get("attributes"),
+            features=race.get("features"),
         ))
     
     weapon_instances = []
     for weapon in game_data.get("weapons"):
-        weapon_instances.append(
-            name=weapon.name,
-            damage=weapon.damage,
-        )
+        weapon_instances.append(Weapon(
+            name=weapon.get("name"),
+            damage=weapon.get("damage"),
+        ))
 
     return {
         "monsters": monster_instances,
         "armors": armor_instances,
-        "races": races_instances,
+        "races": race_instances,
         "weapon": weapon_instances,
         "character_classes": character_classes_instances,
     }
@@ -80,4 +80,4 @@ def load_game():
 
     if not all([monsters, races, character_classes, weapons, armors]):
         raise RuntimeError("Game data not loaded correctly")
-    return game_data
+    return load_game_into_classes(game_data)
