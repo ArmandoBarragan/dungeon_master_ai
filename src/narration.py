@@ -9,10 +9,7 @@ from typing import Any
 from openai import AsyncOpenAI
 
 from .game_engine import Quest
-
-
-def _openai_api_key() -> str | None:
-    return os.getenv("OPENAI_API_KEY") or os.getenv("OpenAIKey")
+from config import OPENAI_API_KEY
 
 
 def _enemy_attack_dicts(enemy) -> list[dict[str, Any]]:
@@ -79,11 +76,10 @@ def quest_brief_for_model(quest: Quest, enemies: list[dict[str, Any]]) -> dict[s
 
 async def fetch_medieval_narrations(brief: dict[str, Any]) -> dict[str, str]:
     """Returns quest_narration and first_encounter_narration (medieval fantasy tone)."""
-    api_key = _openai_api_key()
-    if not api_key:
+    if not OPENAI_API_KEY:
         raise RuntimeError("Missing API key: set OPENAI_API_KEY or OpenAIKey in the environment.")
 
-    client = AsyncOpenAI(api_key=api_key)
+    client = AsyncOpenAI(api_key=OPENAI_API_KEY)
     user_payload = json.dumps(brief, ensure_ascii=False)
 
     system = (
@@ -117,58 +113,6 @@ async def fetch_medieval_narrations(brief: dict[str, Any]) -> dict[str, str]:
         raise RuntimeError("OpenAI JSON missing expected string narrations.")
 
     return {"quest_narration": quest_n, "first_encounter_narration": enc_n}
-
-
-async def fetch_attack_miss_narration(
-    *,
-    target_name: str,
-    attack_total: int,
-    armor_class: int,
-    d20_roll: int,
-) -> str:
-    """Short medieval-flavored miss line; falls back if the API is unavailable."""
-    api_key = _openai_api_key()
-    brief = {
-        "foe_name": target_name,
-        "d20": d20_roll,
-        "attack_total": attack_total,
-        "armor_class": armor_class,
-    }
-    if not api_key:
-        return (
-            f"Thy strike goes wide: the blow totals {attack_total} against the "
-            f"{target_name}'s guard (AC {armor_class}), and steel meets only shadow."
-        )
-
-    client = AsyncOpenAI(api_key=api_key)
-    user_payload = json.dumps(brief, ensure_ascii=False)
-    system = (
-        "You are a medieval fantasy combat narrator. The hero's attack missed. "
-        "Write ONE short paragraph (2–4 sentences), vivid archaic tone, proper name unchanged. "
-        'Return ONLY JSON: {"narration": "<your text>"}'
-    )
-    try:
-        response = await client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user_payload},
-            ],
-            response_format={"type": "json_object"},
-        )
-        raw = response.choices[0].message.content
-        if not raw:
-            raise ValueError("empty")
-        data = json.loads(raw)
-        text = data.get("narration", "")
-        if isinstance(text, str) and text.strip():
-            return text.strip()
-    except Exception:
-        pass
-    return (
-        f"The {target_name} slips aside; thy tally of {attack_total} fails to pierce AC {armor_class}."
-    )
-
 
 async def build_start_json(quest: Quest) -> dict[str, Any]:
     enemies = serialize_first_encounter_enemies(quest)

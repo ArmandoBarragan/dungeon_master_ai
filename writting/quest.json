@@ -1,0 +1,63 @@
+{
+    "initial_narration": "It's a hot day in Eldoria. You are having a drink in the inn when a man comes in and screams in panic.",
+    "incident_dialogue": [{
+            "npc": "The innkeeper",
+            "dialogue": "What in the seven hells is going on? I've never seen you like this before."
+        },
+        {
+            "npc": "Screaming man",
+            "dialogue": "There's a monster in the forest! It's attacking the town!"
+        },
+        {
+            "npc": "The innkeeper",
+            "dialogue": "[To the player] I see you are packing a weapon. Are you a warrior?"
+        }
+    ],
+    "mission_description": {
+        "npc": "The innkeeper",
+        "dialogue": "The town is in danger. The monster is attacking the town. Go and stop it. You will be rewarded with 100 gold."
+    },
+    "acts": [
+        {
+            "objective": "Kill the monster",
+            "scenes": [
+                {
+                    "narration": "You go down the street and see the monster. It's a Grick.",
+                    "type": "combat",
+                    "enemies": [
+                        {
+                            "species": "Grick",
+                            "reward": {
+                                "loot": {
+                                    "gold": 1,
+                                    "items": [
+                                        {
+                                            "name": "Potion of healing",
+                                            "amount": 1
+                                        }
+                                    ]
+                                },
+                                "experience": 100
+                            }
+                        }
+                    ]
+                }
+            ]
+            
+        }
+    ],
+    "final_dialogue": {
+        "npc": "The innkeeper",
+        "dialogue": "You have saved the town. Here is your reward!"
+    },
+    "reward": {
+        "gold": 100,
+        "items": [
+            {
+                "name": "Potion of healing",
+                "amount": 1
+            }
+        ],
+        "experience": 100
+    }
+}

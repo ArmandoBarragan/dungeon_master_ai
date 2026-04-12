@@ -1,62 +1,40 @@
-import random
-from .encounter import Encounter
+import json
+from pathlib import Path
+from typing import Any
 
+from .act import Act
 
-def generate_random_location() -> str:
-    """Devuelve un nombre de lugar de fantasía construido a partir de partes seleccionadas."""
-    prefixes = (
-        "Roca del Castillo",
-        "Whiskey",
-        "Bosque Profundo",
-        "Ocaso",
-        "Pico de Hierro",
-        "Valle Brumoso",
-        "Pino de Plata",
-        "Piedra Vieja",
-        "Descanso del Cuervo",
-        "Lago de Escarcha",
-        "Espina de Espino",
-        "Vado de Ceniza",
-        "Ascua",
-        "Luz de Luna",
-    )
-    sufixes = (
-        "del Valle",
-        "de la Aldea",
-        "del Sendero",
-        "de los Bosques",
-        "del Cruce",
-        "del Hueco",
-        "de la Cresta",
-        "de la Marisma",
-        "del Torreón",
-        "del Claros",
-        "de las Cataratas",
-        "del Brezal",
-    )
-    return f"{random.choice(prefixes)} {random.choice(sufixes)}"
+QUEST_DATA_PATH = Path(__file__).resolve().parents[2] / "writting" / "quest.json"
 
 
 class Quest:
-    def __init__(self, monsters):
-        self.reward = random.randint(400, 800)
-        self.location = generate_random_location()
-        self._generate_encounters(monsters)
+    initial_narration: str
+    incident_dialogue: list[dict[str, str]]
+    mission_description: dict[str, str]
+    acts: list[Act]
+    final_dialogue: dict[str, str]
+    reward: dict[str, Any]
 
-    def _generate_encounters(self, monsters):
-        self.encounters = []
-        self.encounters.append(Encounter(monsters))
-        self.encounters.append(Encounter(monsters))
-        final_encounter = Encounter(monsters, True)
-        self.boss = final_encounter.enemies[0].species.name
-        self.encounters.append(final_encounter)
+    def __init__(self):
+        quest_data = self._load_quest_data()
+        required_fields = [
+            "initial_narration",
+            "incident_dialogue",
+            "mission_description",
+            "acts",
+            "final_dialogue",
+            "reward",
+        ]
+        fields = [quest_data.get(field) for field in required_fields]
+        if not all(fields):
+            raise ValueError("Quest data is missing required fields")
+        for field_name, field_value in zip(required_fields, fields):
+            if field_name == "acts":
+                setattr(self, field_name, [Act(act) for act in field_value])
+                continue
+            setattr(self, field_name, field_value)
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "description": self.description,
-            "reward": self.reward,
-            "boss": self.boss,
-            "location": self.location,
-        }
-    
+    def _load_quest_data(self) -> dict[str, Any]:
+        # TODO: Add S3 integration for production environment
+        with open(QUEST_DATA_PATH, encoding="utf-8") as file:
+            return json.load(file)

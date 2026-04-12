@@ -1,0 +1,73 @@
+{
+    "monsters": [
+      { "name": "Kobold", "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Daga", "damage": "1d4 + 2" }] },
+      { "name": "Goblin", "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Cimitarra", "damage": "1d6 + 2" }] },
+      { "name": "Rata Gigante", "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Mordisco", "damage": "1d4 + 2" }] },
+      { "name": "Stirge", "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Probóscide", "damage": "1d4 + 3" }] },
+      { "name": "Diablillo", "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Aguijón", "damage": "1d4 + 3" }] },
+      { "name": "Sprite", "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Espada larga", "damage": "1" }] },
+      { "name": "Grimlock", "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Maza", "damage": "1d4 + 2" }] },
+      { "name": "Pseudodragón", "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Picotazo", "damage": "1d4 + 2" }] },
+      { "name": "Humo de Mephit", "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Garras", "damage": "1d4 + 1" }] },
+      { "name": "Xvart", "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Espada corta", "damage": "1d6 + 2" }] },
+  
+      { "name": "Grick", "size": "Medium", "behavior": "Solitary", "attacks": [{ "name": "Tentáculos", "damage": "2d6 + 2" }] },
+      { "name": "Acechador Invisible", "size": "Medium", "behavior": "Solitary", "attacks": [{ "name": "Golpe", "damage": "2d6 + 4" }] },
+      { "name": "Doppelganger", "size": "Medium", "behavior": "Solitary", "attacks": [{ "name": "Golpe", "damage": "1d6 + 4" }] },
+      { "name": "Revenant", "size": "Medium", "behavior": "Solitary", "attacks": [{ "name": "Puñetazo", "damage": "2d4 + 4" }] },
+      { "name": "Súcubo", "size": "Medium", "behavior": "Solitary", "attacks": [{ "name": "Garra", "damage": "1d6 + 3" }] },
+      { "name": "Mimic", "size": "Medium", "behavior": "Solitary", "attacks": [{ "name": "Mordisco", "damage": "1d8 + 3" }] },
+      { "name": "Wraith", "size": "Medium", "behavior": "Solitary", "attacks": [{ "name": "Drenar vida", "damage": "4d8 + 3" }] },
+      { "name": "Manto", "size": "Medium", "behavior": "Solitary", "attacks": [{ "name": "Mordisco", "damage": "1d6 + 3" }] },
+      { "name": "Sombra", "size": "Medium", "behavior": "Solitary", "attacks": [{ "name": "Drenar fuerza", "damage": "2d6 + 2" }] },
+      { "name": "Basilisco", "size": "Medium", "behavior": "Solitary", "attacks": [{ "name": "Mordisco", "damage": "2d6 + 3" }] },
+  
+      { "name": "Beholder", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Rayo ocular", "damage": "4d8" }] },
+      { "name": "Dragón Rojo Joven", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "2d10 + 6" }] },
+      { "name": "Gigante de Fuego", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mandoble", "damage": "6d6 + 7" }] },
+      { "name": "Hidra", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "1d10 + 5" }] },
+      { "name": "Tiranosaurio Rex", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "4d12 + 7" }] },
+      { "name": "Aboleth", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Tentáculo", "damage": "2d6 + 5" }] },
+      { "name": "Gorgona", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Embestida", "damage": "2d12 + 5" }] },
+      { "name": "Quimera", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "2d6 + 4" }] },
+      { "name": "Balor", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Espada de Rayo", "damage": "3d8 + 8" }] },
+      { "name": "Señor de las Momias", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Puñetazo podrido", "damage": "3d6 + 4" }] },
+      { "name": "Dragón de Oro Adulto", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "2d10 + 8" }] },
+      { "name": "Gigante de Escarcha", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Hacha de batalla", "damage": "3d12 + 6" }] },
+      { "name": "Marilith", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Espada larga", "damage": "2d8 + 4" }] },
+      { "name": "Rocs", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Pico", "damage": "4d8 + 9" }] },
+      { "name": "Androesfinge", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Garra", "damage": "2d10 + 6" }] },
+      { "name": "Lich", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Toque paralizante", "damage": "3d6" }] },
+      { "name": "Remorhaz", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "6d10 + 7" }] },
+      { "name": "Behir", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "3d10 + 6" }] },
+      { "name": "Goristro", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Puñetazo", "damage": "3d10 + 7" }] },
+      { "name": "Dragón Tortuga", "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "3d12 + 8" }] }
+    ],
+    "races": [
+      {
+        "name": "Humano",
+        "attributes": { "strength": 1, "dexterity": 1, "constitution": 1, "intelligence": 1, "wisdom": 1, "charisma": 1 },
+        "features": ["Versatilidad", "Lenguaje común"]
+      }
+    ],
+    "classes": [
+      {
+        "name": "Bárbaro",
+        "hit_die": "1d12",
+        "features": ["Furia", "Defensa sin armadura", "Ataque temerario"],
+        "proficiencies": ["Armas simples", "Armas marciales", "Armaduras ligeras", "Armaduras medias", "Escudos"]
+      }
+    ],
+    "weapons": [
+      { "name": "Gran hacha", "damage": "1d12" },
+      { "name": "Espadón", "damage": "2d6" },
+      { "name": "Hacha de batalla", "damage": "1d8" },
+      { "name": "Hacha de mano", "damage": "1d6" },
+      { "name": "Jabalina", "damage": "1d6" }
+    ],
+    "armors": [
+      { "name": "Cuero", "ac": "11 + Des" },
+      { "name": "Camisote de mallas", "ac": "13 + Des (máx 2)" },
+      { "name": "Coraza", "ac": "14 + Des (máx 2)" }
+    ]
+  }

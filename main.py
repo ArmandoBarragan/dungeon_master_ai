@@ -3,14 +3,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 
-from src import game_loader, Game
-from src.action_resolution import resolve_player_attack
-from src.game_engine import Quest
-from src.narration import build_start_json
+from src import Game
+
 
 load_dotenv()
-
-game_data = game_loader.load_game()
 
 app = FastAPI()
 
@@ -27,21 +23,17 @@ class ActionRequest(BaseModel):
 @app.get("/start/")
 async def start():
     global game
-    game = Game(None)
-    new_quest = Quest(game_data.get("monsters"))
-    game.quests.append(new_quest)
-
-    try:
-        payload = await build_start_json(new_quest)
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-    except Exception as exc:
-        raise HTTPException(
-            status_code=502,
-            detail="Narration service failed; check logs and OpenAI configuration.",
-        ) from exc
-
-    return JSONResponse(content=payload)
+    game = Game.create_new()
+    return JSONResponse(
+        content={
+            "initial_narration": game.quests[0].initial_narration,
+            "incident_dialogue": game.quests[0].incident_dialogue,
+        },
+        status_code=200,
+        headers={
+            "Content-Type": "application/json",
+        }
+    )
 
 
 @app.post("/action/")
@@ -52,12 +44,7 @@ async def action(body: ActionRequest):
     if body.action != "attack":
         raise HTTPException(status_code=400, detail="Only action='attack' is supported.")
 
-    try:
-        payload = await resolve_player_attack(game, game_data, body.target_id)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    return JSONResponse(content=payload)
+    return JSONResponse(content={})
 
 
 @app.post("/roll")
