@@ -4,7 +4,7 @@ from typing import Any
 
 from .act import Act
 
-QUEST_DATA_PATH = Path(__file__).resolve().parents[2] / "writting" / "quest.json"
+QUEST_DATA_PATH = Path(__file__).resolve().parents[3] / "writting" / "quest.json"
 
 
 class Quest:

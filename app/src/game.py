@@ -1,23 +1,15 @@
 import random
 
 from src.game_engine.character import Character
-from src.game_engine.game_loader import load_game
 from src.game_engine.quest import Quest
 
 
 class Game:
-    def __init__(self, game_data=None):
-        self.game_data = game_data or load_game()
-        self.character = None
-        self.quests = []
-        self.current_encounter_index = 0
-
-    @classmethod
-    def create_new(cls, game_data=None, **character_kwargs):
-        game = cls(game_data)
-        game.character = game._create_random_character(**character_kwargs)
-        game.quests.append(game._create_quest())
-        return game
+    def __init__(self, game_data: dict, game_id: int | None = None):
+        self.game_id = game_id
+        self.game_data = game_data
+        self.character = self._create_random_character()
+        self.quests = [self._create_quest()]
 
     def _create_random_character(self, **kwargs):
         data = self.game_data
@@ -37,17 +29,10 @@ class Game:
     def _create_quest(self):
         return Quest()
 
-    def start_quest(self):
-        # 1. Generate first encounter
-        # 2. Generate second encounter
-        # 3. Generate boss encounter
-        pass
-
     def to_dict(self):
         return {
             "character": self.character.to_dict() if self.character else None,
             "quests": [self._quest_to_dict(quest) for quest in self.quests],
-            "current_encounter_index": self.current_encounter_index,
         }
 
     def _quest_to_dict(self, quest):
