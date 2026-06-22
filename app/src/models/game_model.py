@@ -10,4 +10,14 @@ class Game(Base):
     user = relationship("User", back_populates="games")
     characters = relationship("Character", back_populates="game")
     encounters = relationship("Encounter", back_populates="game")
-    quests = relationship("Quest", back_populates="game")
+    quests = relationship(
+        "Quest",
+        back_populates="game",
+        foreign_keys="Quest.game_id",
+    )
+    active_quest_id = Column(Integer, ForeignKey("quests.id"), nullable=True)
+    active_quest = relationship(
+        "Quest",
+        foreign_keys=[active_quest_id],
+        post_update=True,
+    )

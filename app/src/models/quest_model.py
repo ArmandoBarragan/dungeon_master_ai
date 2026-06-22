@@ -13,9 +13,14 @@ class Quest(Base):
     __tablename__ = "quests"
 
     id = Column(Integer, primary_key=True)
-    game_id = Column(Integer, ForeignKey("games.id"))
-    game = relationship("Game", back_populates="quests")
+    game_id = Column(Integer, ForeignKey("games.id"), nullable=False)
+    game = relationship(
+        "Game",
+        back_populates="quests",
+        foreign_keys=[game_id],
+    )
+    story_key = Column(String, nullable=False)
     name = Column(String, nullable=False)
     description = Column(String, nullable=False)
-    reward = Column(Integer, nullable=False)
     status = Column(String, default=QuestStatus.NOT_STARTED.value, nullable=False)
+    current_scene_index = Column(Integer, default=0, nullable=False)

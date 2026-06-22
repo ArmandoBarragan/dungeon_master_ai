@@ -16,3 +16,12 @@ async def new_game(
         "initial_narration": game.quests[0].initial_narration,
         "incident_dialogue": game.quests[0].incident_dialogue,
     }
+
+@router.post("/answer_dialogue/", status_code=200)
+async def answer_dialogue(
+    user_id: int = Depends(get_current_user_id),
+    game_service: GameService = Depends(get_game_service),
+):
+    answer_dialogue = "Yes, and I will help you." # Turn this later into a prompt
+    user_accepted = True
+    return {}

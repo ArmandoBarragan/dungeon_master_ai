@@ -5,8 +5,7 @@ from src.game_engine.quest import Quest
 
 
 class Game:
-    def __init__(self, game_data: dict, game_id: int | None = None):
-        self.game_id = game_id
+    def __init__(self, game_data: dict):
         self.game_data = game_data
         self.character = self._create_random_character()
         self.quests = [self._create_quest()]
@@ -28,19 +27,3 @@ class Game:
 
     def _create_quest(self):
         return Quest()
-
-    def to_dict(self):
-        return {
-            "character": self.character.to_dict() if self.character else None,
-            "quests": [self._quest_to_dict(quest) for quest in self.quests],
-        }
-
-    def _quest_to_dict(self, quest):
-        return {
-            "initial_narration": quest.initial_narration,
-            "mission_description": quest.mission_description,
-            "acts": [
-                {"objective": act.objective, "scenes": act.scenes}
-                for act in quest.acts
-            ],
-        }

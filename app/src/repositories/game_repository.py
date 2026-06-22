@@ -13,3 +13,8 @@ class GameRepository:
         self.db.commit()
         self.db.refresh(game)
         return game
+
+    def update_game(self, game: Game) -> Game:
+        self.db.commit()
+        self.db.refresh(game)
+        return game

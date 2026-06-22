@@ -8,15 +8,21 @@ QUEST_DATA_PATH = Path(__file__).resolve().parents[3] / "writting" / "quest.json
 
 
 class Quest:
+    name: str
     initial_narration: str
     incident_dialogue: list[dict[str, str]]
     mission_description: dict[str, str]
     acts: list[Act]
     final_dialogue: dict[str, str]
     reward: dict[str, Any]
-
+    story_key: str
+    
     def __init__(self):
         quest_data = self._load_quest_data()
+        self.name = quest_data.get("name")
+        self.description = quest_data.get("description")
+        self.story_key = quest_data.get("story_key")
+        quest_data = quest_data.get("story")
         required_fields = [
             "initial_narration",
             "incident_dialogue",
