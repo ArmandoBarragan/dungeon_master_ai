@@ -7,3 +7,5 @@ class SceneResponse(BaseModel):
     scene_type: SceneType
     enemies: list[str]
     dialogue: list[dict[str, str]]
+    game_id: int | None = None
+    quest_id: int | None = None

@@ -1,10 +1,16 @@
 from sqlalchemy.orm import Session
-from src.models.quest_model import Quest as QuestModel
+from src.models.quest_model import Quest as QuestModel, QuestStatus
 
 
 class QuestRepository:
     def __init__(self, db: Session):
         self.db = db
+
+    def get_active_quest_by_game_id(self, game_id: int) -> QuestModel | None:
+        return self.db.query(QuestModel).filter(
+            QuestModel.game_id == game_id,
+            QuestModel.status == QuestStatus.IN_PROGRESS.value
+        ).first()
 
     def get_quest(self, quest_id: int) -> QuestModel | None:
         return self.db.query(QuestModel).filter(QuestModel.id == quest_id).first()

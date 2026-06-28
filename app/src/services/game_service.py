@@ -13,7 +13,7 @@ class GameService:
         self.game_repository = game_repository
         self.quest_repository = quest_repository
 
-    def create_game(self, user_id: int) -> Game:
+    def create_game(self, user_id: int) -> tuple[Game, int, int]:
         game = Game()
         db_game = self.game_repository.create_game(user_id)
         quest = game.quests[0]
@@ -22,17 +22,23 @@ class GameService:
         )
         db_game.active_quest_id = db_quest.id
         self.game_repository.update_game(db_game)
-        return game
+        return game, db_game.id, db_quest.id
 
-    def get_latest_scene(self, game_id: int) -> Scene:
-        game = self.game_repository.get_game(game_id)
-        if not game:
+    def get_latest_scene(self, quest_id: int) -> Scene | None:
+        quest_record = self.quest_repository.get_quest(quest_id)
+        if not quest_record:
             return None
-        quest = game.active_quest
-        quest_data = Quest(quest.story_key)
-        act = quest_data.acts[quest.current_act_index]
-        scene = act.scenes[quest.current_scene_index]
+        quest_data = Quest(quest_record.story_key)
+        act = quest_data.acts[quest_record.current_act_index]
+        scene = act.scenes[quest_record.current_scene_index]
         return Scene(scene)
+
+    def accept_quest(self, quest_id: int) -> None:
+        quest_record = self.quest_repository.get_quest(quest_id)
+        if not quest_record:
+            return
+        quest_record.status = QuestStatus.IN_PROGRESS.value
+        self.quest_repository.update_quest(quest_record)
 
     def advance_scene(self, quest_id: int) -> Scene | None:
         quest_record = self.quest_repository.get_quest(quest_id)
