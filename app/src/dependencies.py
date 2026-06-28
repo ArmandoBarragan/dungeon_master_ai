@@ -44,9 +44,8 @@ def get_current_user_id(
         ) from exc
 
 
-def get_game_service(
-    game_repository: GameRepository = Depends(get_game_repository),
-    quest_repository: QuestRepository = Depends(get_quest_repository),
-    game_data: dict = Depends(get_game_data),
-) -> GameService:
-    return GameService(game_repository, quest_repository, game_data)
+def get_game_service(db: Session = Depends(get_db)) -> GameService:
+    return GameService(
+        GameRepository(db),
+        QuestRepository(db),
+    )

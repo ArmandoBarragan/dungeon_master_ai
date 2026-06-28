@@ -9,26 +9,20 @@ QUEST_DATA_PATH = Path(__file__).resolve().parents[3] / "writting" / "quest.json
 
 class Quest:
     name: str
-    initial_narration: str
-    incident_dialogue: list[dict[str, str]]
     mission_description: dict[str, str]
     acts: list[Act]
-    final_dialogue: dict[str, str]
     reward: dict[str, Any]
     story_key: str
     
-    def __init__(self):
-        quest_data = self._load_quest_data()
+    def __init__(self, story_key: str):
+        quest_data = self._load_quest_data(story_key)
         self.name = quest_data.get("name")
         self.description = quest_data.get("description")
         self.story_key = quest_data.get("story_key")
         quest_data = quest_data.get("story")
         required_fields = [
-            "initial_narration",
-            "incident_dialogue",
             "mission_description",
             "acts",
-            "final_dialogue",
             "reward",
         ]
         fields = [quest_data.get(field) for field in required_fields]
@@ -40,7 +34,13 @@ class Quest:
                 continue
             setattr(self, field_name, field_value)
 
-    def _load_quest_data(self) -> dict[str, Any]:
+    def _load_quest_data(self, story_key: str) -> dict[str, Any]:
         # TODO: Add S3 integration for production environment
         with open(QUEST_DATA_PATH, encoding="utf-8") as file:
-            return json.load(file)
+            quests = json.load(file)
+        quest_data = next((
+            quest for quest in quests if quest.get("story_key") == story_key
+        ), None)
+        if not quest_data:
+            raise ValueError(f"Quest data not found for story key: {story_key}")
+        return quest_data

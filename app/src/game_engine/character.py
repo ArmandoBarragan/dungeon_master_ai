@@ -1,4 +1,7 @@
-from .game_data import Armor, CharacterClass, Race, Weapon
+from .armor import Armor
+from .character_class import CharacterClass
+from .race import Race
+from .weapon import Weapon
 
 
 class Character:
@@ -31,8 +34,7 @@ class Character:
         self._apply_race_attributes()
 
     def _apply_race_attributes(self):
-        for attr, bonus in self.race.attributes.items():
-            setattr(self, attr, getattr(self, attr) + bonus)
+        pass
 
     def equip_weapon(self, weapon: Weapon):
         self.weapon = weapon

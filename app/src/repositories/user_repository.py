@@ -16,6 +16,6 @@ class UserRepository:
     def create(self, name: str, email: str, hashed_password: str) -> User:
         user = User(name=name, email=email, password=hashed_password)
         self.db.add(user)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(user)
         return user

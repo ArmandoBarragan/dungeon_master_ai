@@ -1,8 +1,13 @@
 # Local development overrides (merged automatically by `docker compose up`).
 # Mounts source code into the container and enables uvicorn hot reload.
+# stdin/tty allow pdb/breakpoint() — when execution stops, attach with:
+#   docker compose attach web
 
 services:
   web:
+    stdin_open: true
+    tty: true
+    restart: "no"
     volumes:
       - .:/app
     command:

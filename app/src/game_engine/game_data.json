@@ -1,0 +1,64 @@
+{
+    "monsters": {
+      "Kobold": { "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Daga", "damage": "1d4 + 2" }] },
+      "Goblin": { "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Cimitarra", "damage": "1d6 + 2" }] },
+      "Rata Gigante": { "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Mordisco", "damage": "1d4 + 2" }] },
+      "Stirge": { "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Probóscide", "damage": "1d4 + 3" }] },
+      "Diablillo": { "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Aguijón", "damage": "1d4 + 3" }] },
+      "Sprite": { "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Espada larga", "damage": "1" }] },
+      "Grimlock": { "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Maza", "damage": "1d4 + 2" }] },
+      "Pseudodragón": { "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Picotazo", "damage": "1d4 + 2" }] },
+      "Humo de Mephit": { "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Garras", "damage": "1d4 + 1" }] },
+      "Xvart": { "size": "Small", "behavior": "Pack", "attacks": [{ "name": "Espada corta", "damage": "1d6 + 2" }] },
+  
+      "Beholder": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Rayo ocular", "damage": "4d8" }] },
+      "Dragón Rojo Joven": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "2d10 + 6" }] },
+      "Gigante de Fuego": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mandoble", "damage": "6d6 + 7" }] },
+      "Hidra": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "1d10 + 5" }] },
+      "Tiranosaurio Rex": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "4d12 + 7" }] },
+      "Aboleth": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Tentáculo", "damage": "2d6 + 5" }] },
+      "Gorgona": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Embestida", "damage": "2d12 + 5" }] },
+      "Quimera": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "2d6 + 4" }] },
+      "Balor": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Espada de Rayo", "damage": "3d8 + 8" }] },
+      "Señor de las Momias": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Puñetazo podrido", "damage": "3d6 + 4" }] },
+      "Dragón de Oro Adulto": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "2d10 + 8" }] },
+      "Gigante de Escarcha": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Hacha de batalla", "damage": "3d12 + 6" }] },
+      "Marilith": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Espada larga", "damage": "2d8 + 4" }] },
+      "Rocs": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Pico", "damage": "4d8 + 9" }] },
+      "Androesfinge": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Garra", "damage": "2d10 + 6" }] },
+      "Lich": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Toque paralizante", "damage": "3d6" }] },
+      "Remorhaz": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "6d10 + 7" }] },
+      "Behir": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "3d10 + 6" }] },
+      "Goristro": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Puñetazo", "damage": "3d10 + 7" }] },
+      "Dragón Tortuga": { "size": "Large", "behavior": "Boss", "attacks": [{ "name": "Mordisco", "damage": "3d12 + 8" }] }
+    },
+    "races": {
+      "Humano": {
+        "attributes": { "strength": 1, "dexterity": 1, "constitution": 1, "intelligence": 1, "wisdom": 1, "charisma": 1 },
+        "features": ["Versatilidad", "Lenguaje común"]
+      }
+    },
+    "weapons": {
+      "Gran hacha": { "damage": "1d12" },
+      "Espadón": { "damage": "2d6" },
+      "Hacha de batalla": { "damage": "1d8" },
+      "Hacha de mano": { "damage": "1d6" },
+      "Jabalina": { "damage": "1d6" }
+    },
+    "armors": {
+      "Cuero": { "ac": "11 + Des" },
+      "Camisote de mallas": { "ac": "13 + Des (máx 2)" },
+      "Coraza": { "ac": "14 + Des (máx 2)" }
+    },
+    "character_classes": {
+      "Bárbaro": { "hit_dice": "1d12" },
+      "Bardo": { "hit_dice": "1d8" },
+      "Clérigo": { "hit_dice": "1d8" },
+      "Druida": { "hit_dice": "1d8" },
+      "Guerrero": { "hit_dice": "1d10" },
+      "Mago": { "hit_dice": "1d6" },
+      "Monje": { "hit_dice": "1d8" },
+      "Paladín": { "hit_dice": "1d10" },
+      "Picaro": { "hit_dice": "1d8" }
+    }
+  }
