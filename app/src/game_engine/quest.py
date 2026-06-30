@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any
 
 from .act import Act
+from .scene import Scene
 
 QUEST_DATA_PATH = Path(__file__).resolve().parents[3] / "writting" / "quest.json"
 
@@ -44,3 +45,6 @@ class Quest:
         if not quest_data:
             raise ValueError(f"Quest data not found for story key: {story_key}")
         return quest_data
+
+    def get_current_scene(self, current_act_index: int, current_scene_index: int) -> Scene:
+        return self.acts[current_act_index].scenes[current_scene_index]

@@ -1,3 +1,5 @@
+import random
+
 from src.game import Game
 from src.repositories import GameRepository, QuestRepository
 from src.game_engine.scene import Scene
@@ -29,9 +31,10 @@ class GameService:
         if not quest_record:
             return None
         quest_data = Quest(quest_record.story_key)
-        act = quest_data.acts[quest_record.current_act_index]
-        scene = act.scenes[quest_record.current_scene_index]
-        return Scene(scene)
+        return quest_data.get_current_scene(
+            quest_record.current_act_index,
+            quest_record.current_scene_index
+        )
 
     def accept_quest(self, quest_id: int) -> None:
         quest_record = self.quest_repository.get_quest(quest_id)
@@ -56,8 +59,25 @@ class GameService:
         else:
             quest_record.current_scene_index += 1
         self.quest_repository.update_quest(quest_record)
-        return Scene(
-            quest.acts[
-                quest_record.current_act_index
-            ].scenes[quest_record.current_scene_index]
+        return quest.get_current_scene(
+            quest_record.current_act_index,
+            quest_record.current_scene_index
         )
+
+    def initiative_roll(self, quest_id: int) -> dict[str, int]:
+        quest_record = self.quest_repository.get_quest(quest_id)
+        if not quest_record:
+            return {}
+        quest = Quest(quest_record.story_key)
+        scene = quest.get_current_scene(
+            quest_record.current_act_index,
+            quest_record.current_scene_index
+        )
+        initiative_roles = {}
+        for enemy in scene.enemies:
+            initiative_roles[enemy.name] = random.randint(1, 20)
+        return {
+            enemy: initiative
+            for enemy, initiative in sorted(initiative_roles.items(),
+            key=lambda x: x[1], reverse=True)
+        }

@@ -3,10 +3,11 @@ from typing import Any
 
 from .attack import Attack
 from .item import Item
-from .monster import Monster
+from .monster_species import MonsterSpecies
 
 class Enemy:
-    species: Monster
+    name: str
+    species: MonsterSpecies
     gold_loot: int
     items_loot: list[Item]
     reward_experience: int
@@ -15,7 +16,8 @@ class Enemy:
     dexterity: int
 
     def __init__(self, enemy_data: dict[str, Any]):
-        self.species = Monster(enemy_data.get("species"))
+        self.name = enemy_data.get("name")
+        self.species = MonsterSpecies(enemy_data.get("species"))
         reward = enemy_data.get("reward") or {}
         loot = reward.get("loot") or {}
         self.gold_loot = loot.get("gold", 0)
