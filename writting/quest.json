@@ -41,6 +41,7 @@
                             "enemies": [
                                 {
                                     "species": "Kobold",
+                                    "name": "Kobold",
                                     "reward": {
                                         "loot": {
                                             "gold": 1,

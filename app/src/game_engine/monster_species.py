@@ -5,7 +5,7 @@ from typing import Any
 GAME_DATA_PATH = Path(__file__).resolve().parent / "game_data.json"
 
 
-class Monster:
+class MonsterSpecies:
     name: str
     size: str
     behavior: str
