@@ -11,9 +11,10 @@ class Enemy:
     gold_loot: int
     items_loot: list[Item]
     reward_experience: int
-    hp: int
+    max_hp: int
     constitution: int
     dexterity: int
+    armor_class: int
 
     def __init__(self, enemy_data: dict[str, Any]):
         self.name = enemy_data.get("name")
@@ -30,15 +31,14 @@ class Enemy:
 
     def _calculate_attributes(self):
         if self.species.size == "Small":
-            self.hp = sum([random.randint(1, 6), random.randint(1, 6)])
+            self.max_hp = sum([random.randint(1, 6), random.randint(1, 6)])
             self.constitution = 10 + random.randint(0, 2)
             self.dexterity = random.randint(3, 6) + random.randint(1, 3)
         elif self.species.size == "Medium":
-            self.hp = sum([random.randint(1, 6) for i in range(6)])
+            self.max_hp = sum([random.randint(1, 6) for i in range(6)])
             self.constitution = 10 + random.randint(3, 5)
             self.dexterity = random.randint(1, 4) + random.randint(1, 3)
         else:
-            self.hp = sum([random.randint(1, 6) for i in range(15)])
+            self.max_hp = sum([random.randint(1, 6) for i in range(15)])
             self.constitution = random.randint(6, 8)
             self.dexterity = random.randint(1, 4) + random.randint(1, 3)
-        

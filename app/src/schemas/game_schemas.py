@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+from src.game_engine.roll import ParticipantRoll
 from src.game_engine.types import SceneType
 
 class SceneResponse(BaseModel):
@@ -15,5 +16,4 @@ class DialogueResponse(BaseModel):
     npc: str
 
 class InitiativeResponse(BaseModel):
-    enemy_initiative_rolls: dict[str, int]
-    player_roll: int
+    participant_rolls: list[ParticipantRoll]

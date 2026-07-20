@@ -30,7 +30,9 @@ class AuthService:
             raise ValueError("Email already registered")
 
         hashed_password = hash_password(password)
-        user = self.user_repository.create(name, email, hashed_password)
+        user = self.user_repository.create(
+            User(name=name, email=email, password=hashed_password)
+        )
         return user, self._create_access_token(user.id)
 
     def login(self, email: str, password: str) -> tuple[User, str]:

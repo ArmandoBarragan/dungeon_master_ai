@@ -11,5 +11,3 @@ class Armor:
             "name": self.name,
             "ac": self.ac,
         }
-
-    
