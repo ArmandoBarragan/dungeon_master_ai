@@ -25,3 +25,4 @@ class Quest(Base):
     status = Column(String, default=QuestStatus.NOT_STARTED.value, nullable=False)
     current_act_index = Column(Integer, default=0, nullable=False)
     current_scene_index = Column(Integer, default=0, nullable=False)
+    encounters = relationship("Encounter", back_populates="quest")

@@ -33,9 +33,10 @@ async def get_latest_scene(
     quest_id: int,
     game_service: GameService = Depends(get_game_service),
 ):
-    scene = game_service.get_latest_scene(quest_id)
-    if not scene:
-        raise HTTPException(status_code=404, detail="Scene or quest not found")
+    try:
+        scene = game_service.get_latest_scene(quest_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     dialogue = scene.dialogue if scene.scene_type == SceneType.DIALOGUE else []
     return _to_scene_response(scene, quest_id)
 
@@ -44,7 +45,10 @@ async def answer_dialogue(
     quest_id: int,
     game_service: GameService = Depends(get_game_service),
 ):
-    game_service.accept_quest(quest_id)
+    try:
+        game_service.accept_quest(quest_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     return DialogueResponse(
         text="Great, thanks!",
         npc="The innkeeper",
@@ -55,10 +59,10 @@ async def advance_scene(
     quest_id: int,
     game_service: GameService = Depends(get_game_service),
 ):
-    game_service.advance_scene(quest_id)
-    scene = game_service.get_latest_scene(quest_id)
-    if not scene:
-        raise HTTPException(status_code=404, detail="Scene or quest not found")
+    try:
+        scene = game_service.advance_scene(quest_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     return _to_scene_response(scene, quest_id)
 
 @router.post("/initiative_roll/", status_code=200)
@@ -67,10 +71,8 @@ async def initiative_roll(
     roll: int,
     game_service: GameService = Depends(get_game_service),
 ):
-    enemy_initiative_rolls = game_service.initiative_roll(quest_id)
-    if not enemy_initiative_rolls:
-        raise HTTPException(status_code=404, detail="Scene or quest not found")
-    return InitiativeResponse(
-        enemy_initiative_rolls=enemy_initiative_rolls,
-        player_roll=roll,
-    )
+    try:
+        initiative_rolls = game_service.initiative_rolls(quest_id, roll)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return InitiativeResponse(participant_rolls=initiative_rolls)
