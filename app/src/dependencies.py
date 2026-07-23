@@ -3,7 +3,14 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from config.db import get_db
-from src.repositories import GameRepository, QuestRepository, UserRepository, CharacterRepository
+from src.repositories import (
+    GameRepository,
+    QuestRepository,
+    UserRepository,
+    CharacterRepository,
+    EncounterRepository,
+    EnemyRepository,
+)
 from src.services.auth_service import AuthService
 from src.services.game_service import GameService
 
@@ -27,6 +34,12 @@ def get_quest_repository(db: Session = Depends(get_db)) -> QuestRepository:
 def get_character_repository(db: Session = Depends(get_db)) -> CharacterRepository:
     return CharacterRepository(db)
 
+def get_encounter_repository(db: Session = Depends(get_db)) -> EncounterRepository:
+    return EncounterRepository(db)
+
+def get_enemy_repository(db: Session = Depends(get_db)) -> EnemyRepository:
+    return EnemyRepository(db)
+
 def get_auth_service(
     user_repository: UserRepository = Depends(get_user_repository),
 ) -> AuthService:
@@ -49,7 +62,9 @@ def get_current_user_id(
 
 def get_game_service(db: Session = Depends(get_db)) -> GameService:
     return GameService(
-        GameRepository(db),
-        QuestRepository(db),
-        CharacterRepository(db),
+        game_repository=GameRepository(db),
+        quest_repository=QuestRepository(db),
+        character_repository=CharacterRepository(db),
+        encounter_repository=EncounterRepository(db),
+        enemy_repository=EnemyRepository(db),
     )

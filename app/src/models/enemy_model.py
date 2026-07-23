@@ -6,10 +6,15 @@ class Enemy(Base):
     __tablename__ = "enemies"
 
     id = Column(Integer, primary_key=True)
+
+    encounter_id = Column(Integer, ForeignKey("encounters.id"), nullable=False)
+    encounter = relationship(
+        "Encounter",
+        back_populates="enemies",
+        foreign_keys=[encounter_id],
+    )
+
     name = Column(String, nullable=False)
-    description = Column(String, nullable=False)
-    hp = Column(Integer, nullable=False)
-    ac = Column(Integer, nullable=False)
-    attacks = Column(String, nullable=False)
-    encounter_id = Column(Integer, ForeignKey("encounters.id"))
-    encounter = relationship("Encounter", back_populates="enemies")
+    max_hp = Column(Integer)
+    armor_class = Column(Integer)
+    current_hp = Column(Integer)
