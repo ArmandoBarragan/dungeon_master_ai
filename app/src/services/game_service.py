@@ -163,9 +163,17 @@ class GameService:
 
     def initiative_rolls(self, quest_id: int, player_roll: int) -> list[ParticipantRoll]:
         scene_context = self._get_scene_context(quest_id)
-        if self.encounter_repository.get_current_encounter_by_quest_id(quest_id):
-            raise ValueError("Encounter already exists for this quest")
         initiative_rolls = [ParticipantRoll(name="Player", enemy_id=None, roll=player_roll)]
+        
+        encounter_record = self.encounter_repository.get_current_encounter_by_quest_id(quest_id)
+        if encounter_record:
+            enemy_records = self.enemy_repository.get_enemies_by_encounter_id(encounter_record.id)
+            initiative_rolls.extend([
+                ParticipantRoll(name=enemy.name, enemy_id=enemy.id, roll=enemy.initiative_roll)
+                for enemy in enemy_records
+            ])
+            return sorted(initiative_rolls, key=lambda x: x.roll, reverse=True)
+
         encounter = self.encounter_repository.create_encounter(
             EncounterModel(
                 quest_id=quest_id,
@@ -173,15 +181,20 @@ class GameService:
                 scene_index=scene_context.scene_index,
             )
         )
-        enemies = [
-            EnemyModel(max_hp=enemy.max_hp, name=enemy.name, encounter_id=encounter.id)
-            for enemy in scene_context.scene.enemies
-        ]
+        enemies = []
+        for enemy in scene_context.scene.enemies:
+            initiative = random.randint(1, 20)
+            enemies.append(EnemyModel(
+                max_hp=enemy.max_hp,
+                name=enemy.name,
+                encounter_id=encounter.id,
+                initiative_roll=initiative,
+                armor_class=enemy.armor_class,
+                current_hp=enemy.max_hp,
+            ))
         enemy_records = self.enemy_repository.create_enemies(enemies)
         for enemy in enemy_records:
-            initiative = random.randint(1, 20)
             initiative_rolls.append(
-                ParticipantRoll(name=enemy.name, enemy_id=enemy.id, roll=initiative)
+                ParticipantRoll(name=enemy.name, enemy_id=enemy.id, roll=enemy.initiative_roll)
             )
-
         return sorted(initiative_rolls, key=lambda x: x.roll, reverse=True)

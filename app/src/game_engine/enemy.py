@@ -25,6 +25,9 @@ class Enemy:
         self.items_loot = [Item(item) for item in loot.get("items", [])]
         self.reward_experience = reward.get("experience", 0)
         self._calculate_attributes()
+        self.armor_class = enemy_data.get("armor_class")
+        if self.armor_class is None:
+            self.armor_class = max(10, 10 + (self.dexterity - 10) // 2)
 
         attacks = enemy_data.get("attacks") or self.species.attacks
         self.attacks = [Attack(attack) for attack in attacks]
