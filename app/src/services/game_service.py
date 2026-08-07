@@ -14,6 +14,8 @@ from src.repositories import (
     QuestRepository,
     EnemyRepository,
 )
+from src.schemas.character_schema import CharacterCreate as CharacterSchema
+from src.repositories.character_mapper import CharacterMapper
 
 
 def _model_name(value) -> str:
@@ -185,3 +187,7 @@ class GameService:
             )
 
         return sorted(initiative_rolls, key=lambda x: x.roll, reverse=True)
+
+    def create_character(self,user_id: int,game_id: int,character: CharacterSchema):
+        character_model = CharacterMapper.to_model(character=character,user_id=user_id,game_id=game_id)
+        self.character_repository.create_character(character_model)
