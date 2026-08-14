@@ -7,7 +7,8 @@ from .scene import Scene
 from .quest import Quest
 from .race import Race
 from .weapon import Weapon
-from .roll import ParticipantRoll
+from .types import CombatActionType
+
 
 __all__ = [
     "Quest",
@@ -19,5 +20,4 @@ __all__ = [
     "Race",
     "Scene",
     "Weapon",
-    "ParticipantRoll",
 ]

@@ -1,9 +1,13 @@
 import random
 from typing import Any
 
+from pydantic import BaseModel
+
 from .attack import Attack
 from .item import Item
 from .monster_species import MonsterSpecies
+from .types import CombatActionType
+
 
 class Enemy:
     name: str
@@ -15,6 +19,7 @@ class Enemy:
     constitution: int
     dexterity: int
     armor_class: int
+    attacks: list[Attack]
 
     def __init__(self, enemy_data: dict[str, Any]):
         self.name = enemy_data.get("name")

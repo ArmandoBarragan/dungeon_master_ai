@@ -4,7 +4,15 @@ from src.dependencies import get_current_user_id, get_game_service
 from src.game_engine import Scene
 from src.game_engine.types import SceneType
 from src.services.game_service import GameService
-from src.schemas import SceneResponse, DialogueResponse, InitiativeResponse
+from src.schemas import (
+    SceneResponse,
+    DialogueResponse,
+    EnemyActionsResponse,
+    PlayerActionRequest,
+    PlayerActionDTO,
+    PlayerDamageRollRequest,
+    EnemyListResponse,
+)
 
 router = APIRouter(prefix="/game", tags=["game"])
 
@@ -72,7 +80,52 @@ async def initiative_roll(
     game_service: GameService = Depends(get_game_service),
 ):
     try:
-        initiative_rolls = game_service.initiative_rolls(quest_id, roll)
+        enemies = game_service.initiative_roll(quest_id, roll)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    return InitiativeResponse(participant_rolls=initiative_rolls)
+    return EnemyListResponse(enemies=enemies)
+
+@router.post("/enemy_actions/", status_code=200)
+async def enemy_actions(
+    quest_id: int,
+    first_turn: bool,
+    game_service: GameService = Depends(get_game_service),
+):
+    try:
+        actions = game_service.enemy_actions(quest_id, first_turn)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return EnemyActionsResponse(enemy_actions=actions)
+
+@router.post("/player_action/", status_code=200)
+async def player_action(
+    action: PlayerActionRequest,
+    game_service: GameService = Depends(get_game_service),
+):
+    try:
+        action_succeeded = game_service.player_action(
+            action.quest_id,
+            PlayerActionDTO(
+                action=action.action,
+                roll=action.roll,
+                target_enemy_id=action.target_enemy_id,
+            )
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"action_succeeded": action_succeeded}
+
+@router.post("/damage_roll/", status_code=200)
+async def damage_roll(
+    damage_roll: PlayerDamageRollRequest,
+    game_service: GameService = Depends(get_game_service),
+):
+    try:
+        enemies = game_service.damage_roll(
+            damage_roll.quest_id,
+            damage_roll.total_damage,
+            damage_roll.target_enemy_id,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return EnemyListResponse(enemies=enemies)

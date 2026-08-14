@@ -18,4 +18,4 @@ class Enemy(Base):
     max_hp = Column(Integer)
     armor_class = Column(Integer)
     current_hp = Column(Integer)
-    initiative_roll = Column(Integer, nullable=False)
+    initiative_turn = Column(Integer, nullable=False)
