@@ -48,6 +48,17 @@ async def get_latest_scene(
     dialogue = scene.dialogue if scene.scene_type == SceneType.DIALOGUE else []
     return _to_scene_response(scene, quest_id)
 
+@router.get("/character/", status_code=200)
+async def get_character(
+    quest_id: int,
+    game_service: GameService = Depends(get_game_service),
+):
+    try:
+        character = game_service.get_character(quest_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return character
+
 @router.post("/answer_dialogue/", status_code=200)
 async def answer_dialogue(
     quest_id: int,

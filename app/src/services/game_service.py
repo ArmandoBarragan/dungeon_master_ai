@@ -14,7 +14,7 @@ from src.repositories import (
     QuestRepository,
     EnemyRepository,
 )
-from src.schemas import PlayerActionDTO, EnemyActionDTO
+from src.schemas import PlayerActionDTO, EnemyActionDTO, CharacterDTO
 
 
 def _model_name(value) -> str:
@@ -123,6 +123,31 @@ class GameService:
         db_game.active_quest_id = db_quest.id
         self.game_repository.update_game(db_game)
         return game, db_game.id, db_quest.id
+
+    def get_character(self, quest_id: int) -> CharacterDTO:
+        character_record = self.character_repository.get_character_from_quest(quest_id)
+        if not character_record:
+            raise ValueError("Character not found for this quest.")
+        return CharacterDTO(
+            name=character_record.name,
+            character_class=character_record.character_class,
+            level=character_record.level,
+            race=character_record.race,
+            background=character_record.background,
+            alignment=character_record.alignment,
+            player_name=character_record.player_name,
+            weapon=character_record.weapon,
+            armor=character_record.armor,
+            armor_class=character_record.armor_class,
+            max_hp=character_record.max_hp,
+            current_hp=character_record.current_hp,
+            constitution=character_record.constitution,
+            dexterity=character_record.dexterity,
+            strength=character_record.strength,
+            wisdom=character_record.wisdom,
+            intelligence=character_record.intelligence,
+            charisma=character_record.charisma
+        )
 
     def get_latest_scene(self, quest_id: int) -> Scene:
         quest_record = self.quest_repository.get_quest(quest_id)

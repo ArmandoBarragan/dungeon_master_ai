@@ -9,7 +9,7 @@ from .game_schemas import (
     EnemyListResponse,
 )
 
-from .dtos import PlayerActionDTO, EnemyActionDTO
+from .dtos import PlayerActionDTO, EnemyActionDTO, CharacterDTO
 
 __all__ = [
     "UserCreate",
