@@ -84,9 +84,9 @@ class GameService:
             scene=scene,
         )
         
-    def create_game(self, user_id: int) -> tuple[Game, int, int]:
+    def create_game(self, user_id: int, world_name: str) -> tuple[Game, int, int]:
         game = Game()
-        db_game = self.game_repository.create_game(GameModel(user_id=user_id))
+        db_game = self.game_repository.create_game(GameModel(user_id=user_id, world_name=world_name))
         quest = game.quests[0]
         db_quest = self.quest_repository.create_quest(
             QuestModel(
@@ -123,6 +123,19 @@ class GameService:
         db_game.active_quest_id = db_quest.id
         self.game_repository.update_game(db_game)
         return game, db_game.id, db_quest.id
+
+    def get_games(self, user_id: int) -> list[dict[str, int]]:
+        games = self.game_repository.get_games_by_user(user_id)
+        games = [(game, game.characters[0]) for game in games]
+        return [
+            {
+                "game_id": game.id,
+                "character_name": character.name,
+                "world_name": game.world_name,
+                "active_quest_id": game.active_quest_id,
+            }
+            for game, character in games
+        ]
 
     def get_character(self, quest_id: int) -> CharacterDTO:
         character_record = self.character_repository.get_character_from_quest(quest_id)

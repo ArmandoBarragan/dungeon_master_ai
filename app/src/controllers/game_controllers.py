@@ -29,12 +29,23 @@ def _to_scene_response(scene: Scene, quest_id: int, game_id: int | None = None) 
 
 @router.post("/new_game/", status_code=201)
 async def new_game(
+    world_name: str,
     user_id: int = Depends(get_current_user_id),
     game_service: GameService = Depends(get_game_service),
 ):
-    game, game_id, quest_id = game_service.create_game(user_id)
+    game, game_id, quest_id = game_service.create_game(user_id, world_name)
     intro_scene = game.quests[0].acts[0].scenes[0]
     return _to_scene_response(intro_scene, quest_id, game_id)
+
+
+@router.get("/", status_code=200)
+async def get_games(
+        user_id: int = Depends(get_current_user_id),
+        game_service: GameService = Depends(get_game_service)
+    ):
+    games = game_service.get_games(user_id)
+    return {"games": games}
+
 
 @router.get("/get_latest_scene/", status_code=200)
 async def get_latest_scene(
