@@ -13,8 +13,7 @@ class CharacterRepository:
         self.db.refresh(character)
         return character
 
-    def get_character_from_quest(self, quest_id: int) -> Character | None:
-        game_id = self.db.query(Quest).filter(Quest.id == quest_id).first().game.id
+    def get_character_from_game(self, game_id: int) -> Character | None:
         return self.db.query(Character).filter(Character.game_id == game_id).first()
 
     def update(self, character: Character) -> Character:

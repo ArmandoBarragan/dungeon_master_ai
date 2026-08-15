@@ -110,7 +110,8 @@ class GameService:
                 player_name=character.player_name,
                 weapon=_model_name(character.weapon),
                 armor=_model_name(character.armor),
-                hp=character.hp,
+                max_hp=character.max_hp,
+                current_hp=character.max_hp,
                 constitution=character.constitution,
                 dexterity=character.dexterity,
                 strength=character.strength,
@@ -137,10 +138,10 @@ class GameService:
             for game, character in games
         ]
 
-    def get_character(self, quest_id: int) -> CharacterDTO:
-        character_record = self.character_repository.get_character_from_quest(quest_id)
+    def get_character(self, game_id: int) -> CharacterDTO:
+        character_record = self.character_repository.get_character_from_game(game_id)
         if not character_record:
-            raise ValueError("Character not found for this quest.")
+            raise ValueError("Character not found for this game.")
         return CharacterDTO(
             name=character_record.name,
             character_class=character_record.character_class,

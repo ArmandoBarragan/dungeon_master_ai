@@ -32,6 +32,13 @@ class Game:
             background=kwargs.get("background", "Soldier"),
             alignment=kwargs.get("alignment", "Lawful Good"),
             player_name=kwargs.get("player_name", "Derek"),
+            max_hp=12,
+            constitution=kwargs.get("constitution", 14),
+            dexterity=kwargs.get("dexterity", 12),
+            strength=kwargs.get("strength", 16),
+            wisdom=kwargs.get("wisdom", 10),
+            intelligence=kwargs.get("intelligence", 10),
+            charisma=kwargs.get("charisma", 8)
         )
         character.equip_weapon(random.choice(weapons))
         character.equip_armor(random.choice(armors))

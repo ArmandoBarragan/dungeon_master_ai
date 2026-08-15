@@ -32,6 +32,8 @@ class Character:
         background: str,
         alignment: str,
         player_name: str,
+        *args,
+        **kwargs,
     ):
         self.name = name
         self.character_class = character_class
@@ -42,8 +44,7 @@ class Character:
         self.player_name = player_name
         self.weapon: Weapon | None = None
         self.armor: Armor | None = None
-        self.max_hp = 0
-        self.hp = 0
+        self.max_hp = kwargs.get("max_hp", 10)
         self.constitution = 10
         self.dexterity = 10
         self.strength = 10

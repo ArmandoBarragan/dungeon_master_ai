@@ -422,7 +422,7 @@
         }
     },
     "races": {
-        "Humano": {
+        "Human": {
             "attributes": {
                 "strength": 1,
                 "dexterity": 1,
@@ -432,8 +432,8 @@
                 "charisma": 1
             },
             "features": [
-                "Versatilidad",
-                "Lenguaje común"
+                "Versatility",
+                "Common Language"
             ]
         }
     },

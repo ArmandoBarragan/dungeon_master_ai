@@ -61,11 +61,11 @@ async def get_latest_scene(
 
 @router.get("/character/", status_code=200)
 async def get_character(
-    quest_id: int,
+    game_id: int,
     game_service: GameService = Depends(get_game_service),
 ):
     try:
-        character = game_service.get_character(quest_id)
+        character = game_service.get_character(game_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     return character
