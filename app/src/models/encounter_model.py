@@ -25,3 +25,4 @@ class Encounter(Base):
     scene_index = Column(Integer, nullable=False)
     state = Column(String, nullable=False, default=EncounterStatus.ACTIVE.value)
     enemies = relationship("Enemy", back_populates="encounter")
+    player_initiative_turn = Column(Integer, nullable=True)

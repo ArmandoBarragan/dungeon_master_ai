@@ -21,9 +21,11 @@ class Character(Base):
     player_name = Column(String, nullable=False)
     weapon = Column(String, nullable=False)
     armor = Column(String, nullable=False)
-    
+    armor_class = Column(Integer, nullable=False)
+
     # Attributes
-    hp = Column(Integer, nullable=False)
+    max_hp = Column(Integer, nullable=False)
+    current_hp = Column(Integer, nullable=False)
     constitution = Column(Integer, nullable=False)
     dexterity = Column(Integer, nullable=False)
     strength = Column(Integer, nullable=False)

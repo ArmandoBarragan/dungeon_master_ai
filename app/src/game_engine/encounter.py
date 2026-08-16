@@ -2,6 +2,7 @@ from typing import Any
 
 from .enemy import Enemy
 
+
 class Encounter:
     enemies: list[Enemy]
 

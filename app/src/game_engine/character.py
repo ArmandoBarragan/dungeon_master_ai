@@ -5,6 +5,24 @@ from .weapon import Weapon
 
 
 class Character:
+    name: str
+    character_class: CharacterClass
+    level: int
+    race: Race
+    background: str
+    alignment: str
+    player_name: str
+    weapon: Weapon | None
+    armor: Armor | None
+    max_hp: int
+    hp: int
+    constitution: int
+    dexterity: int
+    strength: int
+    wisdom: int
+    intelligence: int
+    charisma: int
+
     def __init__(
         self,
         name: str,
@@ -14,6 +32,8 @@ class Character:
         background: str,
         alignment: str,
         player_name: str,
+        *args,
+        **kwargs,
     ):
         self.name = name
         self.character_class = character_class
@@ -24,7 +44,7 @@ class Character:
         self.player_name = player_name
         self.weapon: Weapon | None = None
         self.armor: Armor | None = None
-        self.hp = 0
+        self.max_hp = kwargs.get("max_hp", 10)
         self.constitution = 10
         self.dexterity = 10
         self.strength = 10
@@ -32,6 +52,10 @@ class Character:
         self.intelligence = 10
         self.charisma = 10
         self._apply_race_attributes()
+
+    @property
+    def armor_class(self):
+        return self.armor.ac
 
     def _apply_race_attributes(self):
         pass

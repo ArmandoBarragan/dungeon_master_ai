@@ -3,7 +3,7 @@ import random
 from dataclasses import dataclass, field
 from src.models.enemy_model import Enemy as EnemyModel
 from src.game import Game
-from src.game_engine import Scene, Quest, ParticipantRoll, Enemy
+from src.game_engine import Scene, Quest, Enemy, CombatActionType
 from src.models import Character as CharacterModel, Game as GameModel
 from src.models.encounter_model import Encounter as EncounterModel
 from src.models.quest_model import Quest as QuestModel, QuestStatus
@@ -14,6 +14,7 @@ from src.repositories import (
     QuestRepository,
     EnemyRepository,
 )
+from src.schemas import PlayerActionDTO, EnemyActionDTO, CharacterDTO
 
 
 def _model_name(value) -> str:
@@ -44,10 +45,10 @@ class SceneContext:
             if enemy.name == enemy_record.name
         ]
 
-    def load_enemies(self, enemy_records: list[EnemyModel], scene: Scene) -> list[EnemyView]:
+    def load_enemies(self, enemy_records: list[EnemyModel]) -> list[EnemyView]:
         return [
             EnemyView(engine=enemy, db_id=enemy_record.id)
-            for enemy in scene.enemies for enemy_record in enemy_records
+            for enemy in self.scene.enemies for enemy_record in enemy_records
             if enemy.name == enemy_record.name
         ]
 
@@ -83,9 +84,9 @@ class GameService:
             scene=scene,
         )
         
-    def create_game(self, user_id: int) -> tuple[Game, int, int]:
+    def create_game(self, user_id: int, world_name: str) -> tuple[Game, int, int]:
         game = Game()
-        db_game = self.game_repository.create_game(GameModel(user_id=user_id))
+        db_game = self.game_repository.create_game(GameModel(user_id=user_id, world_name=world_name))
         quest = game.quests[0]
         db_quest = self.quest_repository.create_quest(
             QuestModel(
@@ -109,18 +110,58 @@ class GameService:
                 player_name=character.player_name,
                 weapon=_model_name(character.weapon),
                 armor=_model_name(character.armor),
-                hp=character.hp,
+                max_hp=character.max_hp,
+                current_hp=character.max_hp,
                 constitution=character.constitution,
                 dexterity=character.dexterity,
                 strength=character.strength,
                 wisdom=character.wisdom,
                 intelligence=character.intelligence,
                 charisma=character.charisma,
+                armor_class=10,
             )
         )
         db_game.active_quest_id = db_quest.id
         self.game_repository.update_game(db_game)
         return game, db_game.id, db_quest.id
+
+    def get_games(self, user_id: int) -> list[dict[str, int]]:
+        games = self.game_repository.get_games_by_user(user_id)
+        games = [(game, game.characters[0]) for game in games]
+        return [
+            {
+                "game_id": game.id,
+                "character_name": character.name,
+                "world_name": game.world_name,
+                "active_quest_id": game.active_quest_id,
+            }
+            for game, character in games
+        ]
+
+    def get_character(self, game_id: int) -> CharacterDTO:
+        character_record = self.character_repository.get_character_from_game(game_id)
+        if not character_record:
+            raise ValueError("Character not found for this game.")
+        return CharacterDTO(
+            name=character_record.name,
+            character_class=character_record.character_class,
+            level=character_record.level,
+            race=character_record.race,
+            background=character_record.background,
+            alignment=character_record.alignment,
+            player_name=character_record.player_name,
+            weapon=character_record.weapon,
+            armor=character_record.armor,
+            armor_class=character_record.armor_class,
+            max_hp=character_record.max_hp,
+            current_hp=character_record.current_hp,
+            constitution=character_record.constitution,
+            dexterity=character_record.dexterity,
+            strength=character_record.strength,
+            wisdom=character_record.wisdom,
+            intelligence=character_record.intelligence,
+            charisma=character_record.charisma
+        )
 
     def get_latest_scene(self, quest_id: int) -> Scene:
         quest_record = self.quest_repository.get_quest(quest_id)
@@ -161,18 +202,12 @@ class GameService:
             quest_record.current_scene_index
         )
 
-    def initiative_rolls(self, quest_id: int, player_roll: int) -> list[ParticipantRoll]:
-        scene_context = self._get_scene_context(quest_id)
-        initiative_rolls = [ParticipantRoll(name="Player", enemy_id=None, roll=player_roll)]
-        
+    def initiative_roll(self, quest_id: int, player_roll: int) -> list[dict[str, int]]:
+        scene_context = self._get_scene_context(quest_id)        
         encounter_record = self.encounter_repository.get_current_encounter_by_quest_id(quest_id)
         if encounter_record:
-            enemy_records = self.enemy_repository.get_enemies_by_encounter_id(encounter_record.id)
-            initiative_rolls.extend([
-                ParticipantRoll(name=enemy.name, enemy_id=enemy.id, roll=enemy.initiative_roll)
-                for enemy in enemy_records
-            ])
-            return sorted(initiative_rolls, key=lambda x: x.roll, reverse=True)
+            enemies = self.enemy_repository.get_enemies_by_encounter_id(encounter_record.id)
+            return [{"name": enemy.name, "id": enemy.id} for enemy in enemies]
 
         encounter = self.encounter_repository.create_encounter(
             EncounterModel(
@@ -181,20 +216,108 @@ class GameService:
                 scene_index=scene_context.scene_index,
             )
         )
+        rolls = [(enemy, random.randint(1, 20)) for enemy in scene_context.scene.enemies]
+        rolls.append((None, player_roll))
+        rolls = sorted(
+            rolls,
+            key=lambda x: x[1],
+            reverse=True,
+        )
         enemies = []
-        for enemy in scene_context.scene.enemies:
-            initiative = random.randint(1, 20)
+        for i, (enemy, _) in enumerate(rolls):
+            if enemy is None:
+                encounter.player_initiative_turn = i
+                self.encounter_repository.update_encounter(encounter)
+                continue
             enemies.append(EnemyModel(
                 max_hp=enemy.max_hp,
                 name=enemy.name,
                 encounter_id=encounter.id,
-                initiative_roll=initiative,
+                initiative_turn=i,
                 armor_class=enemy.armor_class,
                 current_hp=enemy.max_hp,
             ))
         enemy_records = self.enemy_repository.create_enemies(enemies)
-        for enemy in enemy_records:
-            initiative_rolls.append(
-                ParticipantRoll(name=enemy.name, enemy_id=enemy.id, roll=enemy.initiative_roll)
+        return [{"name": enemy.name, "id": enemy.id} for enemy in enemy_records]
+
+    def enemy_actions(self, quest_id: int, first_turn: bool) -> list[EnemyActionDTO]:
+        encounter_record = self.encounter_repository.get_current_encounter_by_quest_id(quest_id)
+        if not encounter_record:
+            raise ValueError("No active encounter found for this quest.")
+        
+        enemy_records = self.enemy_repository.get_enemies_by_encounter_id(
+            encounter_record.id,
+            order_by=[("initiative_turn", "asc")],
+        )
+
+        turns = [(enemy.name, enemy.initiative_turn) for enemy in enemy_records]
+        turns.append(("player", encounter_record.player_initiative_turn))
+        turns = sorted(turns, key=lambda x: x[1])
+        
+        player_turn = encounter_record.player_initiative_turn
+        if first_turn:
+            enemy_records = enemy_records[:player_turn]
+        else:
+            enemy_records = enemy_records[player_turn:] + enemy_records[:player_turn]
+        actions = []
+
+        scene_context = self._get_scene_context(quest_id)
+        enemy_views = scene_context.load_enemies(enemy_records)
+        character = self.character_repository.get_character_from_quest(quest_id)
+        character_armor_class = character.armor_class
+        for enemy in enemy_views:
+            attack_roll = random.randint(1, 20)
+            total_damage = 0
+            description = f"{enemy.engine.name} attacks you."
+            attack = enemy.engine.attacks[0]
+            if attack_roll > character_armor_class:
+                total_damage = sum([
+                    random.randint(1, attack.dice_type) for _ in range(attack.roll_repetitions)
+                ]) + attack.fixed_damage
+                character.current_hp = character.current_hp - sum(total_damage)
+                description += f"It deals {sum(total_damage)}"
+            else:
+                description += "It missed."
+            action = EnemyActionDTO(
+                action=CombatActionType.ATTACK,
+                description=description,
+                damage=total_damage,
+                succeeded=attack_roll > character_armor_class,
             )
-        return sorted(initiative_rolls, key=lambda x: x.roll, reverse=True)
+            actions.append(action)
+        self.character_repository.update(character)
+        return actions
+
+    def player_action(self, quest_id: int, action: PlayerActionDTO) -> bool:
+        encounter_record = self.encounter_repository.get_current_encounter_by_quest_id(quest_id)
+        if not encounter_record:
+            raise ValueError("No active encounter found for this quest.")
+        
+        character = self.character_repository.get_character_from_quest(quest_id)
+        if action.action == CombatActionType.ATTACK:
+            target_enemy = self.enemy_repository.get(action.target_enemy_id)
+            if not target_enemy or target_enemy.encounter_id != encounter_record.id:
+                raise ValueError("Target enemy not found in the current encounter.")
+            attack_roll = action.roll + character.strength
+            return attack_roll > target_enemy.armor_class    
+        else:
+            raise NotImplementedError(f"Action {action.action} is not implemented yet.")
+
+    def damage_roll(self, quest_id: int, total_damage: int, target_enemy_id: int) -> None:
+        encounter_record = self.encounter_repository.get_current_encounter_by_quest_id(quest_id)
+        if not encounter_record:
+            raise ValueError("No active encounter found for this quest.")
+        
+        character = self.character_repository.get_character_from_quest(quest_id)
+        target_enemy = self.enemy_repository.get(target_enemy_id)
+        if not target_enemy:
+            raise ValueError("Target enemy not found in the current encounter.")
+        
+        target_enemy.current_hp -= total_damage
+        if target_enemy.current_hp <= 0:
+            self.enemy_repository.delete_enemy(target_enemy.id)
+        else:
+            self.enemy_repository.update(target_enemy)
+        enemy_records = self.enemy_repository.get_enemies_by_encounter_id(encounter_record.id)
+        return [{"name": enemy.name, "id": enemy.id} for enemy in enemy_records]
+ 

@@ -14,12 +14,28 @@ class EnemyRepository:
             self.db.refresh(enemy)
         return enemies
 
-    def get_enemy(self, enemy_id: int) -> Enemy | None:
+    def get(self, enemy_id: int) -> Enemy | None:
         return self.db.query(Enemy).filter(Enemy.id == enemy_id).first()
 
-    def update_enemy(self, enemy: Enemy) -> Enemy:
+    def update(self, enemy: Enemy) -> Enemy:
         self.db.flush()
         return enemy
 
-    def get_enemies_by_encounter_id(self, encounter_id: int) -> list[Enemy]:
-        return self.db.query(Enemy).filter(Enemy.encounter_id == encounter_id).all()
+    def get_enemies_by_encounter_id(
+        self, 
+        encounter_id: int,
+        params: dict | None = None,
+        order_by: list | None = None,
+        order_direction: list | None = None
+    ) -> list[Enemy]:
+        query = self.db.query(Enemy).filter(Enemy.encounter_id == encounter_id)
+        if params:
+            for key, value in params.items():
+                query = query.filter(getattr(Enemy, key) == value)
+        if order_by:
+            for column, direction in order_by:
+                if direction == "desc":
+                    query = query.order_by(getattr(Enemy, column).desc())
+                else:
+                    query = query.order_by(getattr(Enemy, column).asc())
+        return query.all()
