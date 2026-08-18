@@ -7,6 +7,7 @@ from .game_schemas import (
     PlayerActionRequest,
     PlayerDamageRollRequest,
     EnemyListResponse,
+    AnswerDialogueRequest,
 )
 
 from .dtos import PlayerActionDTO, EnemyActionDTO, CharacterDTO
@@ -23,4 +24,5 @@ __all__ = [
     "PlayerActionDTO",
     "PlayerDamageRollRequest",
     "EnemyListResponse",
+    "AnswerDialogueRequest",
 ]

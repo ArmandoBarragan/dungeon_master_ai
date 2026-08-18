@@ -23,6 +23,5 @@ class Quest(Base):
     name = Column(String, nullable=False)
     description = Column(String, nullable=False)
     status = Column(String, default=QuestStatus.NOT_STARTED.value, nullable=False)
-    current_act_index = Column(Integer, default=0, nullable=False)
-    current_scene_index = Column(Integer, default=0, nullable=False)
+    scene_id = Column(String, default="quest_start", nullable=False)
     encounters = relationship("Encounter", back_populates="quest")

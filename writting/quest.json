@@ -8,69 +8,99 @@
                 "npc": "The innkeeper",
                 "dialogue": "The town is in danger. The monster is attacking the town. Go and stop it. You will be rewarded with 100 gold."
             },
-            "acts": [
+            "scenes": [
                 {
-                    "objective": "Witness the incident",
-                    "scenes": [
+                    "id": "quest_start",
+                    "narration": "It's a hot day in Eldoria. You are having a drink in the inn when a man comes in and screams in panic.",
+                    "type": "dialogue",
+                    "dialogue": [
                         {
-                            "narration": "It's a hot day in Eldoria. You are having a drink in the inn when a man comes in and screams in panic.",
-                            "type": "dialogue",
-                            "dialogue": [
+                            "npc": "The innkeeper",
+                            "dialogue": "What in the seven hells is going on? I've never seen you like this before."
+                        },
+                        {
+                            "npc": "Screaming man",
+                            "dialogue": "There's a monster in the forest! It's attacking the town!"
+                        },
+                        {
+                            "npc": "The innkeeper",
+                            "dialogue": "[To the player] I see you are packing a weapon. Are you a warrior?"
+                        }
+                    ],
+                    "options": [
+                        {
+                            "text": "Yes, I am a warrior. I will stop the monster.",
+                            "next_scene_id": "monster_fight",
+                            "starts_quest": true,
+                            "npc_response": [
                                 {
                                     "npc": "The innkeeper",
-                                    "dialogue": "What in the seven hells is going on? I've never seen you like this before."
+                                    "dialogue": "I wish you luck, warrior."
                                 },
                                 {
                                     "npc": "Screaming man",
-                                    "dialogue": "There's a monster in the forest! It's attacking the town!"
+                                    "dialogue": "Please, hurry!"
+                                }
+                            ]
+                        },
+                        {
+                            "text": "No, I am just a traveler. I will not get involved.",
+                            "next_scene_id": "village_dies"
+                        }
+                    ]
+                },
+                {
+                    "id": "monster_fight",
+                    "narration": "You go down the street and see the monster. It's a Kobold.",
+                    "type": "combat",
+                    "enemies": [
+                        {
+                            "species": "Kobold",
+                            "name": "Kobold",
+                            "reward": {
+                                "loot": {
+                                    "gold": 1,
+                                    "items": [
+                                        {
+                                            "name": "Potion of healing",
+                                            "amount": 1
+                                        }
+                                    ]
                                 },
-                                {
-                                    "npc": "The innkeeper",
-                                    "dialogue": "[To the player] I see you are packing a weapon. Are you a warrior?"
-                                }
-                            ]
+                                "experience": 100
+                            }
+                        }
+                    ],
+                    "outcomes": [
+                        {
+                            "result": "victory",
+                            "next_scene_id": "return_to_inn"
+                        },
+                        {
+                            "result": "defeat",
+                            "next_scene_id": "village_dies"
                         }
                     ]
                 },
                 {
-                    "objective": "Kill the monster",
-                    "scenes": [
+                    "id": "return_to_inn",
+                    "narration": "You return to the inn, victorious.",
+                    "type": "dialogue",
+                    "dialogue": [
                         {
-                            "narration": "You go down the street and see the monster. It's a Kobold.",
-                            "type": "combat",
-                            "enemies": [
-                                {
-                                    "species": "Kobold",
-                                    "name": "Kobold",
-                                    "reward": {
-                                        "loot": {
-                                            "gold": 1,
-                                            "items": [
-                                                {
-                                                    "name": "Potion of healing",
-                                                    "amount": 1
-                                                }
-                                            ]
-                                        },
-                                        "experience": 100
-                                    }
-                                }
-                            ]
+                            "npc": "The innkeeper",
+                            "dialogue": "You have saved the town. Here is your reward!"
                         }
                     ]
                 },
                 {
-                    "objective": "Return to the inn",
-                    "scenes": [
+                    "id": "village_dies",
+                    "narration": "You lost. You lay on the ground while the kobold destroys the town. It kills the children in front of you. You are a failure.",
+                    "type": "dialogue",
+                    "dialogue": [
                         {
-                            "narration": "You return to the inn, victorious.",
-                            "type": "dialogue",
-                            "dialogue": [
-                                {
-                                    "npc": "The innkeeper",
-                                    "dialogue": "You have saved the town. Here is your reward!"
-                                }
-                            ]
+                            "npc": "The innkeeper",
+                            "dialogue": "You have failed. The town is destroyed."
                         }
                     ]
                 }

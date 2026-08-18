@@ -21,7 +21,6 @@ class Encounter(Base):
         foreign_keys=[quest_id],
     )
 
-    act_index = Column(Integer, nullable=False)
     scene_index = Column(Integer, nullable=False)
     state = Column(String, nullable=False, default=EncounterStatus.ACTIVE.value)
     enemies = relationship("Enemy", back_populates="encounter")

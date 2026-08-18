@@ -12,6 +12,7 @@ from src.schemas import (
     PlayerActionDTO,
     PlayerDamageRollRequest,
     EnemyListResponse,
+    AnswerDialogueRequest,
 )
 
 router = APIRouter(prefix="/game", tags=["game"])
@@ -25,6 +26,7 @@ def _to_scene_response(scene: Scene, quest_id: int, game_id: int | None = None) 
         dialogue=scene.dialogue if scene.scene_type == SceneType.DIALOGUE else [],
         game_id=game_id,
         quest_id=quest_id,
+        options=scene.options,
     )
 
 @router.post("/new_game/", status_code=201)
@@ -34,8 +36,7 @@ async def new_game(
     game_service: GameService = Depends(get_game_service),
 ):
     game, game_id, quest_id = game_service.create_game(user_id, world_name)
-    intro_scene = game.quests[0].acts[0].scenes[0]
-    return _to_scene_response(intro_scene, quest_id, game_id)
+    return {"game_id": game_id, "quest_id": quest_id}
 
 
 @router.get("/", status_code=200)
@@ -47,13 +48,13 @@ async def get_games(
     return {"games": games}
 
 
-@router.get("/get_latest_scene/", status_code=200)
-async def get_latest_scene(
+@router.get("/current_scene/", status_code=200)
+async def current_scene(
     quest_id: int,
     game_service: GameService = Depends(get_game_service),
 ):
     try:
-        scene = game_service.get_latest_scene(quest_id)
+        scene = game_service.get_current_scene(quest_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     dialogue = scene.dialogue if scene.scene_type == SceneType.DIALOGUE else []
@@ -72,28 +73,21 @@ async def get_character(
 
 @router.post("/answer_dialogue/", status_code=200)
 async def answer_dialogue(
-    quest_id: int,
+    answer_dialogue_request: AnswerDialogueRequest,
     game_service: GameService = Depends(get_game_service),
 ):
     try:
-        game_service.accept_quest(quest_id)
+        npc_reply = game_service.answer_dialogue(
+            answer_dialogue_request.quest_id,
+            answer_dialogue_request.chosen_next_scene_id,
+            answer_dialogue.starts_quest,
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     return DialogueResponse(
-        text="Great, thanks!",
-        npc="The innkeeper",
+        text=npc_reply.dialogue,
+        npc=npc_reply.npc,
     )
-
-@router.post("/advance_scene/", status_code=200)
-async def advance_scene(
-    quest_id: int,
-    game_service: GameService = Depends(get_game_service),
-):
-    try:
-        scene = game_service.advance_scene(quest_id)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    return _to_scene_response(scene, quest_id)
 
 @router.post("/initiative_roll/", status_code=200)
 async def initiative_roll(

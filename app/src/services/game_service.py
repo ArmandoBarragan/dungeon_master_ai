@@ -3,7 +3,7 @@ import random
 from dataclasses import dataclass, field
 from src.models.enemy_model import Enemy as EnemyModel
 from src.game import Game
-from src.game_engine import Scene, Quest, Enemy, CombatActionType
+from src.game_engine import Scene, Quest, Enemy, CombatActionType, Dialogue
 from src.models import Character as CharacterModel, Game as GameModel
 from src.models.encounter_model import Encounter as EncounterModel
 from src.models.quest_model import Quest as QuestModel, QuestStatus
@@ -32,7 +32,6 @@ class EnemyView:
 @dataclass
 class SceneContext:
     quest_id: int
-    act_index: int
     scene_index: int
     scene: Scene
     encounter_id: int | None = None
@@ -73,13 +72,9 @@ class GameService:
         if not quest_record:
             raise ValueError("Quest not found")
         quest = Quest(quest_record.story_key)
-        scene = quest.get_current_scene(
-            quest_record.current_act_index,
-            quest_record.current_scene_index,
-        )
+        scene = quest.get_current_scene(quest_record.current_scene_index)
         return SceneContext(
             quest_id=quest_id,
-            act_index=quest_record.current_act_index,
             scene_index=quest_record.current_scene_index,
             scene=scene,
         )
@@ -163,44 +158,31 @@ class GameService:
             charisma=character_record.charisma
         )
 
-    def get_latest_scene(self, quest_id: int) -> Scene:
+    def get_current_scene(self, quest_id: int) -> Scene:
         quest_record = self.quest_repository.get_quest(quest_id)
         if not quest_record:
             raise ValueError("Quest not found")
-        quest_data = Quest(quest_record.story_key)
-        return quest_data.get_current_scene(
-            quest_record.current_act_index,
-            quest_record.current_scene_index
-        )
-
-    def accept_quest(self, quest_id: int):
-        quest_record = self.quest_repository.get_quest(quest_id)
-        if not quest_record:
-            raise ValueError("Quest not found")
-        quest_record.status = QuestStatus.IN_PROGRESS.value
-        self.quest_repository.update_quest(quest_record)
-
-    def advance_scene(self, quest_id: int) -> Scene | None:
-        scene_context = self._get_scene_context(quest_id)
-        quest_record = self.quest_repository.get_quest(scene_context.quest_id)
         quest = Quest(quest_record.story_key)
-        current_act_scene_length = len(
-            quest.acts[quest_record.current_act_index].scenes
-        )
-        if quest_record.current_scene_index == current_act_scene_length - 1:
-            if quest_record.current_act_index == len(quest.acts) - 1:
-                quest_record.status = QuestStatus.COMPLETED.value
-                self.quest_repository.update_quest(quest_record)
-                return None
-            quest_record.current_act_index += 1
-            quest_record.current_scene_index = 0
-        else:
-            quest_record.current_scene_index += 1
-        self.quest_repository.update_quest(quest_record)
-        return quest.get_current_scene(
-            quest_record.current_act_index,
-            quest_record.current_scene_index
-        )
+        return quest.get_scene(quest_record.scene_id)
+
+    def answer_dialogue(self, quest_id: int, chosen_next_scene_id: str, starts_quest: bool) -> Dialogue:
+        quest_record = self.quest_repository.get_quest(quest_id)
+        npc_reply = 
+        if not quest_record:
+            raise ValueError("Quest not found")
+        scene = Quest(quest_record.story_key).get_scene(quest_record.scene_id)
+        # Not all dialogues start quests but if they have that attribute as false and the quest
+        # is already started, it would reset it to NOT STARTED, so we only update the attribute when
+        # it's true
+        if starts_quest:
+            quest._record_status = QuestStatus.IN_PROGRESS.value()
+        quest_record.scene_id = chosen_next_scene_id
+        self.quest_repository.update(quest_record)
+        return next((
+            option.npc_response
+            for option in scene.options
+            if option.next_scene_id == chosen_next_scene_id
+        ), None)
 
     def initiative_roll(self, quest_id: int, player_roll: int) -> list[dict[str, int]]:
         scene_context = self._get_scene_context(quest_id)        
@@ -212,7 +194,6 @@ class GameService:
         encounter = self.encounter_repository.create_encounter(
             EncounterModel(
                 quest_id=quest_id,
-                act_index=scene_context.act_index,
                 scene_index=scene_context.scene_index,
             )
         )
