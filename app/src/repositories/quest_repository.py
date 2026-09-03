@@ -22,6 +22,6 @@ class QuestRepository:
         self.db.refresh(quest)
         return quest
 
-    def update_quest(self, quest: Quest) -> Quest:
+    def update(self, quest: Quest) -> Quest:
         self.db.flush()
         return quest

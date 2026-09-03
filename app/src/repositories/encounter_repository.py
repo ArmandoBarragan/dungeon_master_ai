@@ -19,9 +19,14 @@ class EncounterRepository:
             Encounter.state == EncounterStatus.ACTIVE.value,
         ).first()
 
+    def get_latest_encounter_by_quest_id(self, quest_id: int) -> Encounter | None:
+        return self.db.query(Encounter).filter(
+            Encounter.quest_id == quest_id,
+        ).order_by(Encounter.id.desc()).first()
+
     def get_encounter(self, encounter_id: int) -> Encounter | None:
         return self.db.query(Encounter).filter(Encounter.id == encounter_id).first()
 
-    def update_encounter(self, encounter: Encounter) -> Encounter:
+    def update(self, encounter: Encounter) -> Encounter:
         self.db.flush()
         return encounter

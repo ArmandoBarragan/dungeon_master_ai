@@ -7,6 +7,7 @@ class Enemy(Base):
 
     id = Column(Integer, primary_key=True)
 
+    key = Column(String, nullable=False)
     encounter_id = Column(Integer, ForeignKey("encounters.id"), nullable=False)
     encounter = relationship(
         "Encounter",

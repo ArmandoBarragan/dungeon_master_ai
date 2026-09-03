@@ -8,6 +8,7 @@ from .quest import Quest
 from .race import Race
 from .weapon import Weapon
 from .types import CombatActionType
+from .dialogue import Dialogue
 
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "Race",
     "Scene",
     "Weapon",
+    "Dialogue",
 ]

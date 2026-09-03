@@ -1,11 +1,12 @@
 import random
 
 from dataclasses import dataclass, field
-from src.models.enemy_model import Enemy as EnemyModel
+from pydantic import BaseModel, ConfigDict
+
 from src.game import Game
-from src.game_engine import Scene, Quest, Enemy, CombatActionType
-from src.models import Character as CharacterModel, Game as GameModel
-from src.models.encounter_model import Encounter as EncounterModel
+from src.game_engine import Scene, Quest, Enemy, CombatActionType, Dialogue
+from src.models import Character as CharacterModel, Game as GameModel, Enemy as EnemyModel
+from src.models.encounter_model import Encounter as EncounterModel, EncounterStatus
 from src.models.quest_model import Quest as QuestModel, QuestStatus
 from src.repositories import (
     CharacterRepository,
@@ -14,7 +15,7 @@ from src.repositories import (
     QuestRepository,
     EnemyRepository,
 )
-from src.schemas import PlayerActionDTO, EnemyActionDTO, CharacterDTO
+from src.schemas.dtos import PlayerActionDTO, EnemyActionDTO, CharacterDTO
 
 
 def _model_name(value) -> str:
@@ -23,34 +24,41 @@ def _model_name(value) -> str:
     return value.name
 
 
-@dataclass
-class EnemyView:
+class EnemyView(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     engine: Enemy
-    db_id: int | None = None
+    record: EnemyModel
 
 
 @dataclass
 class SceneContext:
     quest_id: int
-    act_index: int
     scene_index: int
     scene: Scene
     encounter_id: int | None = None
     enemies: list[EnemyView] = field(default_factory=list)
 
-    def _match_enemies_by_name(self, enemies: list[Enemy], enemy_records: list[EnemyModel]) -> list[EnemyView]:
-        return [
-            EnemyView(engine=enemy, db_id=enemy_record.id)
-            for enemy in enemies for enemy_record in enemy_records
-            if enemy.name == enemy_record.name
-        ]
+    def load_enemies(self, enemy_records: list[EnemyModel], player_turn: int) -> list[EnemyView]:
+        """Pair encounter records with their quest-defined enemy engines by key."""
+        enemies_by_key = {enemy.key: enemy for enemy in self.scene.enemies}
+        enemy_views = []
 
-    def load_enemies(self, enemy_records: list[EnemyModel]) -> list[EnemyView]:
-        return [
-            EnemyView(engine=enemy, db_id=enemy_record.id)
-            for enemy in self.scene.enemies for enemy_record in enemy_records
-            if enemy.name == enemy_record.name
-        ]
+        for enemy_record in enemy_records:
+            engine = enemies_by_key.get(enemy_record.key)
+            if engine is None:
+                raise ValueError(
+                    f"Enemy key '{enemy_record.key}' is not defined in scene "
+                    f"'{self.scene.id}'."
+                )
+            enemy_views.append(EnemyView(engine=engine, record=enemy_record))
+
+        self.enemies = enemy_views
+        enemy_views = sorted(
+            enemy_views, key=lambda x: x.record.initiative_turn, reverse=False
+        )
+        enemy_views = enemy_views[player_turn:] + enemy_views[:player_turn]
+        return enemy_views
 
 
 class GameService:
@@ -73,14 +81,18 @@ class GameService:
         if not quest_record:
             raise ValueError("Quest not found")
         quest = Quest(quest_record.story_key)
-        scene = quest.get_current_scene(
-            quest_record.current_act_index,
-            quest_record.current_scene_index,
+        scene = quest.get_scene(quest_record.scene_id)
+        if scene is None:
+            raise ValueError(
+                f"Scene not found for quest: {quest_record.scene_id}"
+            )
+        scene_index = next(
+            index for index, quest_scene in enumerate(quest.scenes)
+            if quest_scene.id == scene.id
         )
         return SceneContext(
             quest_id=quest_id,
-            act_index=quest_record.current_act_index,
-            scene_index=quest_record.current_scene_index,
+            scene_index=scene_index,
             scene=scene,
         )
         
@@ -163,44 +175,35 @@ class GameService:
             charisma=character_record.charisma
         )
 
-    def get_latest_scene(self, quest_id: int) -> Scene:
+    def get_current_scene(self, quest_id: int) -> Scene:
         quest_record = self.quest_repository.get_quest(quest_id)
         if not quest_record:
             raise ValueError("Quest not found")
-        quest_data = Quest(quest_record.story_key)
-        return quest_data.get_current_scene(
-            quest_record.current_act_index,
-            quest_record.current_scene_index
-        )
-
-    def accept_quest(self, quest_id: int):
-        quest_record = self.quest_repository.get_quest(quest_id)
-        if not quest_record:
-            raise ValueError("Quest not found")
-        quest_record.status = QuestStatus.IN_PROGRESS.value
-        self.quest_repository.update_quest(quest_record)
-
-    def advance_scene(self, quest_id: int) -> Scene | None:
-        scene_context = self._get_scene_context(quest_id)
-        quest_record = self.quest_repository.get_quest(scene_context.quest_id)
         quest = Quest(quest_record.story_key)
-        current_act_scene_length = len(
-            quest.acts[quest_record.current_act_index].scenes
-        )
-        if quest_record.current_scene_index == current_act_scene_length - 1:
-            if quest_record.current_act_index == len(quest.acts) - 1:
-                quest_record.status = QuestStatus.COMPLETED.value
-                self.quest_repository.update_quest(quest_record)
-                return None
-            quest_record.current_act_index += 1
-            quest_record.current_scene_index = 0
-        else:
-            quest_record.current_scene_index += 1
-        self.quest_repository.update_quest(quest_record)
-        return quest.get_current_scene(
-            quest_record.current_act_index,
-            quest_record.current_scene_index
-        )
+        return quest.get_scene(quest_record.scene_id)
+
+    def answer_dialogue(
+        self, quest_id: int, chosen_next_scene_id: str, starts_quest: bool
+    ) -> list[Dialogue]:
+        quest_record = self.quest_repository.get_quest(quest_id)
+        if not quest_record:
+            raise ValueError("Quest not found")
+        scene = Quest(quest_record.story_key).get_scene(quest_record.scene_id)
+        if scene is None:
+            raise ValueError(f"Scene not found for quest: {quest_record.scene_id}")
+        npc_reply = scene.get_npc_reply(chosen_next_scene_id)
+        if npc_reply is None:
+            raise ValueError(
+                f"Option not found for next scene: {chosen_next_scene_id}"
+            )
+        # Not all dialogues start quests but if they have that attribute as false and the quest
+        # is already started, it would reset it to NOT STARTED, so we only update the attribute when
+        # it's true
+        if starts_quest:
+            quest_record.status = QuestStatus.IN_PROGRESS.value
+        quest_record.scene_id = chosen_next_scene_id
+        self.quest_repository.update(quest_record)
+        return npc_reply
 
     def initiative_roll(self, quest_id: int, player_roll: int) -> list[dict[str, int]]:
         scene_context = self._get_scene_context(quest_id)        
@@ -212,7 +215,6 @@ class GameService:
         encounter = self.encounter_repository.create_encounter(
             EncounterModel(
                 quest_id=quest_id,
-                act_index=scene_context.act_index,
                 scene_index=scene_context.scene_index,
             )
         )
@@ -227,7 +229,7 @@ class GameService:
         for i, (enemy, _) in enumerate(rolls):
             if enemy is None:
                 encounter.player_initiative_turn = i
-                self.encounter_repository.update_encounter(encounter)
+                self.encounter_repository.update(encounter)
                 continue
             enemies.append(EnemyModel(
                 max_hp=enemy.max_hp,
@@ -236,6 +238,7 @@ class GameService:
                 initiative_turn=i,
                 armor_class=enemy.armor_class,
                 current_hp=enemy.max_hp,
+                key=enemy.key,
             ))
         enemy_records = self.enemy_repository.create_enemies(enemies)
         return [{"name": enemy.name, "id": enemy.id} for enemy in enemy_records]
@@ -250,42 +253,27 @@ class GameService:
             order_by=[("initiative_turn", "asc")],
         )
 
-        turns = [(enemy.name, enemy.initiative_turn) for enemy in enemy_records]
-        turns.append(("player", encounter_record.player_initiative_turn))
-        turns = sorted(turns, key=lambda x: x[1])
-        
-        player_turn = encounter_record.player_initiative_turn
-        if first_turn:
-            enemy_records = enemy_records[:player_turn]
-        else:
-            enemy_records = enemy_records[player_turn:] + enemy_records[:player_turn]
-        actions = []
-
         scene_context = self._get_scene_context(quest_id)
-        enemy_views = scene_context.load_enemies(enemy_records)
-        character = self.character_repository.get_character_from_quest(quest_id)
-        character_armor_class = character.armor_class
+        enemy_views = scene_context.load_enemies(enemy_records, encounter_record.player_initiative_turn)
+        character = self.character_repository.get_character_from_game(encounter_record.quest.game_id)
+        actions = []
         for enemy in enemy_views:
-            attack_roll = random.randint(1, 20)
-            total_damage = 0
-            description = f"{enemy.engine.name} attacks you."
-            attack = enemy.engine.attacks[0]
-            if attack_roll > character_armor_class:
-                total_damage = sum([
-                    random.randint(1, attack.dice_type) for _ in range(attack.roll_repetitions)
-                ]) + attack.fixed_damage
-                character.current_hp = character.current_hp - sum(total_damage)
-                description += f"It deals {sum(total_damage)}"
-            else:
-                description += "It missed."
+            attack_result = enemy.engine.play_turn(character.armor_class)
+            if attack_result.get("succeeded"):
+                character.current_hp -= attack_result.get("total_damage")
+                if character.current_hp < 0:
+                    character.current_hp = 0
             action = EnemyActionDTO(
                 action=CombatActionType.ATTACK,
-                description=description,
-                damage=total_damage,
-                succeeded=attack_roll > character_armor_class,
+                attack_roll=attack_result.get("attack_roll"),
+                damage=attack_result.get("total_damage"),
+                succeeded=attack_result.get("succeeded"),
             )
             actions.append(action)
         self.character_repository.update(character)
+        if character.current_hp <= 0:
+            encounter_record.state = EncounterStatus.DEFEATED.value
+            self.encounter_repository.update(encounter_record)
         return actions
 
     def player_action(self, quest_id: int, action: PlayerActionDTO) -> bool:
@@ -293,7 +281,7 @@ class GameService:
         if not encounter_record:
             raise ValueError("No active encounter found for this quest.")
         
-        character = self.character_repository.get_character_from_quest(quest_id)
+        character = self.character_repository.get_character_from_game(encounter_record.quest.game_id)
         if action.action == CombatActionType.ATTACK:
             target_enemy = self.enemy_repository.get(action.target_enemy_id)
             if not target_enemy or target_enemy.encounter_id != encounter_record.id:
@@ -308,16 +296,64 @@ class GameService:
         if not encounter_record:
             raise ValueError("No active encounter found for this quest.")
         
-        character = self.character_repository.get_character_from_quest(quest_id)
+        character = self.character_repository.get_character_from_game(encounter_record.quest.game_id)
         target_enemy = self.enemy_repository.get(target_enemy_id)
         if not target_enemy:
             raise ValueError("Target enemy not found in the current encounter.")
         
         target_enemy.current_hp -= total_damage
         if target_enemy.current_hp <= 0:
-            self.enemy_repository.delete_enemy(target_enemy.id)
+            self.enemy_repository.delete(target_enemy.id)
         else:
             self.enemy_repository.update(target_enemy)
         enemy_records = self.enemy_repository.get_enemies_by_encounter_id(encounter_record.id)
+        if not enemy_records:
+            encounter_record.state = EncounterStatus.SUCCEEDED.value
+            self.encounter_repository.update(encounter_record)
         return [{"name": enemy.name, "id": enemy.id} for enemy in enemy_records]
  
+    def forward_scene(self, quest_id: int) -> Scene:
+        quest_record = self.quest_repository.get_quest(quest_id)
+        if not quest_record:
+            raise ValueError("Quest not found")
+
+        quest = Quest(quest_record.story_key)
+        current_scene = quest.get_scene(quest_record.scene_id)
+        if current_scene is None:
+            raise ValueError(f"Scene not found for quest: {quest_record.scene_id}")
+        if not current_scene.outcomes:
+            raise ValueError("Current scene has no outcomes")
+
+        encounter = self.encounter_repository.get_latest_encounter_by_quest_id(quest_id)
+        terminal_states = {
+            EncounterStatus.SUCCEEDED.value,
+            EncounterStatus.DEFEATED.value,
+        }
+        if not encounter or encounter.state not in terminal_states:
+            raise ValueError("Encounter is not finished")
+
+        character = self.character_repository.get_character_from_game(quest_record.game_id)
+        enemies = self.enemy_repository.get_enemies_by_encounter_id(encounter.id)
+
+        if encounter.state == EncounterStatus.SUCCEEDED.value and enemies:
+            raise ValueError("Succeeded encounter still has living enemies")
+        if encounter.state == EncounterStatus.DEFEATED.value and character.current_hp > 0:
+            raise ValueError("Defeated encounter has a living character")
+
+        outcome = next(
+            (outcome for outcome in current_scene.outcomes
+             if outcome.get("result") == encounter.state),
+            None,
+        )
+        if outcome is None:
+            raise ValueError(f"No outcome configured for result: {encounter.state}")
+
+        next_scene = quest.get_scene(outcome.get("next_scene_id"))
+        if next_scene is None:
+            raise ValueError(
+                f"Scene not found for outcome: {outcome.get('next_scene_id')}"
+            )
+
+        quest_record.scene_id = next_scene.id
+        self.quest_repository.update(quest_record)
+        return next_scene

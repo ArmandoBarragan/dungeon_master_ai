@@ -2,7 +2,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .act import Act
 from .scene import Scene
 
 QUEST_DATA_PATH = Path(__file__).resolve().parents[3] / "writting" / "quest.json"
@@ -11,7 +10,7 @@ QUEST_DATA_PATH = Path(__file__).resolve().parents[3] / "writting" / "quest.json
 class Quest:
     name: str
     mission_description: dict[str, str]
-    acts: list[Act]
+    scenes: list[Scene]
     reward: dict[str, Any]
     story_key: str
     
@@ -23,15 +22,15 @@ class Quest:
         quest_data = quest_data.get("story")
         required_fields = [
             "mission_description",
-            "acts",
+            "scenes",
             "reward",
         ]
         fields = [quest_data.get(field) for field in required_fields]
         if not all(fields):
             raise ValueError("Quest data is missing required fields")
         for field_name, field_value in zip(required_fields, fields):
-            if field_name == "acts":
-                setattr(self, field_name, [Act(act) for act in field_value])
+            if field_name == "scenes":
+                setattr(self, field_name, [Scene(scene) for scene in field_value])
                 continue
             setattr(self, field_name, field_value)
 
@@ -46,5 +45,8 @@ class Quest:
             raise ValueError(f"Quest data not found for story key: {story_key}")
         return quest_data
 
-    def get_current_scene(self, current_act_index: int, current_scene_index: int) -> Scene:
-        return self.acts[current_act_index].scenes[current_scene_index]
+    def get_scene(self, scene_id: str) -> Scene:
+        return next(
+            (scene for scene in self.scenes if scene.id == scene_id),
+            None
+        )

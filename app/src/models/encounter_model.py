@@ -7,7 +7,8 @@ from config.db import Base
 
 class EncounterStatus(str, Enum):
     ACTIVE = "active"
-    COMPLETED = "completed"
+    SUCCEEDED = "succeeded"
+    DEFEATED = "defeated"
 
 
 class Encounter(Base):
@@ -21,7 +22,6 @@ class Encounter(Base):
         foreign_keys=[quest_id],
     )
 
-    act_index = Column(Integer, nullable=False)
     scene_index = Column(Integer, nullable=False)
     state = Column(String, nullable=False, default=EncounterStatus.ACTIVE.value)
     enemies = relationship("Enemy", back_populates="encounter")
