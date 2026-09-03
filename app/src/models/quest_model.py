@@ -7,7 +7,7 @@ class QuestStatus(Enum):
     NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
-    FAILED = "failed"
+    DEFEAT = "defeat"
 
 class Quest(Base):
     __tablename__ = "quests"

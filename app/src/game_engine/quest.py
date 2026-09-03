@@ -47,6 +47,6 @@ class Quest:
 
     def get_scene(self, scene_id: str) -> Scene:
         return next(
-            (scene for scene in self.scenes if scene["id"] == scene_id),
+            (scene for scene in self.scenes if scene.id == scene_id),
             None
         )

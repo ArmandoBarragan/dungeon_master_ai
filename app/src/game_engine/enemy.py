@@ -11,6 +11,7 @@ from .types import CombatActionType
 
 class Enemy:
     name: str
+    key: str
     species: MonsterSpecies
     gold_loot: int
     items_loot: list[Item]
@@ -21,7 +22,9 @@ class Enemy:
     armor_class: int
     attacks: list[Attack]
 
-    def __init__(self, enemy_data: dict[str, Any]):
+    def __init__(self, enemy_data: dict[str, Any] = None):
+        enemy_data = enemy_data or {}
+        self.key = enemy_data.get("key")
         self.name = enemy_data.get("name")
         self.species = MonsterSpecies(enemy_data.get("species"))
         reward = enemy_data.get("reward") or {}
@@ -50,3 +53,20 @@ class Enemy:
             self.max_hp = sum([random.randint(1, 6) for i in range(15)])
             self.constitution = random.randint(6, 8)
             self.dexterity = random.randint(1, 4) + random.randint(1, 3)
+
+    def play_turn(self, target_armor_class: int) -> dict:
+        attack_roll = random.randint(1, 20)
+        total_damage = 0
+        attack = self.attacks[0]
+        succeeded = attack_roll > target_armor_class
+        if succeeded:
+            total_damage = sum([
+                random.randint(1, attack.dice_type)
+                for _ in range(attack.roll_repetitions)
+            ]) + attack.fixed_damage
+        return {
+            "succeeded": succeeded,
+            "attack_roll": attack_roll,
+            "total_damage": total_damage,
+            "attack_name": attack.name,
+        }

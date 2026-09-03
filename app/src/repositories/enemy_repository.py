@@ -21,6 +21,13 @@ class EnemyRepository:
         self.db.flush()
         return enemy
 
+    def delete(self, enemy_id: int) -> None:
+        enemy = self.db.query(Enemy).filter(Enemy.id == enemy_id).first()
+        if enemy is None:
+            return
+        self.db.delete(enemy)
+        self.db.flush()
+
     def get_enemies_by_encounter_id(
         self, 
         encounter_id: int,

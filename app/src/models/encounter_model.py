@@ -7,7 +7,8 @@ from config.db import Base
 
 class EncounterStatus(str, Enum):
     ACTIVE = "active"
-    COMPLETED = "completed"
+    SUCCEEDED = "succeeded"
+    DEFEATED = "defeated"
 
 
 class Encounter(Base):

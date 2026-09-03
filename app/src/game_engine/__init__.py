@@ -8,7 +8,7 @@ from .quest import Quest
 from .race import Race
 from .weapon import Weapon
 from .types import CombatActionType
-from . import Dialogue
+from .dialogue import Dialogue
 
 
 __all__ = [

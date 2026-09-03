@@ -33,6 +33,5 @@ class PlayerActionDTO(BaseModel):
 
 class EnemyActionDTO(BaseModel):
     action: CombatActionType
-    description: str | None = None
     damage: int | None = None
     succeeded: bool

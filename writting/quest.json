@@ -57,6 +57,7 @@
                         {
                             "species": "Kobold",
                             "name": "Kobold",
+                            "key": "kobold",
                             "reward": {
                                 "loot": {
                                     "gold": 1,
@@ -73,11 +74,11 @@
                     ],
                     "outcomes": [
                         {
-                            "result": "victory",
+                            "result": "succeeded",
                             "next_scene_id": "return_to_inn"
                         },
                         {
-                            "result": "defeat",
+                            "result": "defeated",
                             "next_scene_id": "village_dies"
                         }
                     ]
