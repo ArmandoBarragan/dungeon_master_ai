@@ -35,7 +35,6 @@ def _to_scene_response(scene: Scene, quest_id: int, game_id: int | None = None) 
             OptionResponse(
                 text=option.text,
                 next_scene_id=option.next_scene_id,
-                starts_quest=option.starts_quest,
                 npc_response=[
                     {"npc": response.npc, "dialogue": response.dialogue}
                     for response in option.npc_response
@@ -103,7 +102,6 @@ async def answer_dialogue(
         npc_reply = game_service.answer_dialogue(
             answer_dialogue_request.quest_id,
             answer_dialogue_request.chosen_next_scene_id,
-            answer_dialogue_request.starts_quest,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

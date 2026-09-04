@@ -8,7 +8,6 @@ from src.schemas.dtos import EnemyActionDTO
 class OptionResponse(BaseModel):
     text: str
     next_scene_id: str
-    starts_quest: bool = False
     npc_response: list[dict[str, str]] = Field(default_factory=list)
 
 
@@ -31,7 +30,6 @@ class SceneResponse(BaseModel):
 class AnswerDialogueRequest(BaseModel):
     quest_id: int
     chosen_next_scene_id: str
-    starts_quest: bool
 
 class DialogueResponse(BaseModel):
     text: str

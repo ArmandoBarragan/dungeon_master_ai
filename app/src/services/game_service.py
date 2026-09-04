@@ -183,7 +183,7 @@ class GameService:
         return quest.get_scene(quest_record.scene_id)
 
     def answer_dialogue(
-        self, quest_id: int, chosen_next_scene_id: str, starts_quest: bool
+        self, quest_id: int, chosen_next_scene_id: str
     ) -> list[Dialogue]:
         quest_record = self.quest_repository.get_quest(quest_id)
         if not quest_record:
@@ -191,19 +191,26 @@ class GameService:
         scene = Quest(quest_record.story_key).get_scene(quest_record.scene_id)
         if scene is None:
             raise ValueError(f"Scene not found for quest: {quest_record.scene_id}")
-        npc_reply = scene.get_npc_reply(chosen_next_scene_id)
-        if npc_reply is None:
+        option = next(
+            (
+                option
+                for option in scene.options
+                if option.next_scene_id == chosen_next_scene_id
+            ),
+            None,
+        )
+        if option is None:
             raise ValueError(
                 f"Option not found for next scene: {chosen_next_scene_id}"
             )
         # Not all dialogues start quests but if they have that attribute as false and the quest
         # is already started, it would reset it to NOT STARTED, so we only update the attribute when
         # it's true
-        if starts_quest:
+        if option.starts_quest:
             quest_record.status = QuestStatus.IN_PROGRESS.value
         quest_record.scene_id = chosen_next_scene_id
         self.quest_repository.update(quest_record)
-        return npc_reply
+        return option.npc_response
 
     def initiative_roll(self, quest_id: int, player_roll: int) -> list[dict[str, int]]:
         scene_context = self._get_scene_context(quest_id)        
