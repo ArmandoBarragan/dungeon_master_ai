@@ -27,7 +27,9 @@ def _to_scene_response(scene: Scene, quest_id: int, game_id: int | None = None) 
     return SceneResponse(
         narration=scene.narration,
         scene_type=scene.scene_type,
-        enemies=[enemy.name for enemy in scene.enemies],
+        enemies=EnemyListResponse(
+            enemies=[{"ref": enemy.ref, "name": enemy.name} for enemy in scene.enemies]
+        ),
         dialogue=scene.dialogue if scene.scene_type == SceneType.DIALOGUE else [],
         game_id=game_id,
         quest_id=quest_id,
@@ -145,7 +147,7 @@ async def player_action(
             PlayerActionDTO(
                 action=action.action,
                 roll=action.roll,
-                target_enemy_id=action.target_enemy_id,
+                target_enemy_ref=action.target_enemy_ref,
             )
         )
     except ValueError as e:
@@ -161,7 +163,7 @@ async def damage_roll(
         enemies = game_service.damage_roll(
             damage_roll.quest_id,
             damage_roll.total_damage,
-            damage_roll.target_enemy_id,
+            damage_roll.target_enemy_ref,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -16,10 +16,14 @@ class OutcomeResponse(BaseModel):
     next_scene_id: str
 
 
+class EnemyListResponse(BaseModel):
+    enemies: list[dict[str, str]]
+
+
 class SceneResponse(BaseModel):
     narration: str
     scene_type: SceneType
-    enemies: list[str]
+    enemies: EnemyListResponse
     dialogue: list[dict[str, str]]
     game_id: int | None = None
     quest_id: int | None = None
@@ -48,10 +52,6 @@ class EnemyActionRequest(BaseModel):
     quest_id: int
     first_turn: bool
 
-class EnemyListResponse(BaseModel):
-    enemies: list[dict]
-
-
 class EnemyActionsResponse(BaseModel):
     enemy_actions: list[EnemyActionDTO]
 
@@ -60,10 +60,10 @@ class PlayerActionRequest(BaseModel):
     quest_id: int
     action: CombatActionType
     roll: int
-    target_enemy_id: int | None = None
+    target_enemy_ref: str | None = None
     
 
 class PlayerDamageRollRequest(BaseModel):
     quest_id: int
     total_damage: int # Takes the sum of the damage rolls and the fixed damage
-    target_enemy_id: int | None = None
+    target_enemy_ref: str | None = None

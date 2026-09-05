@@ -11,7 +11,7 @@ from .types import CombatActionType
 
 class Enemy:
     name: str
-    key: str
+    ref: str
     species: MonsterSpecies
     gold_loot: int
     items_loot: list[Item]
@@ -24,7 +24,7 @@ class Enemy:
 
     def __init__(self, enemy_data: dict[str, Any] = None):
         enemy_data = enemy_data or {}
-        self.key = enemy_data.get("key")
+        self.ref = enemy_data.get("ref")
         self.name = enemy_data.get("name")
         self.species = MonsterSpecies(enemy_data.get("species"))
         reward = enemy_data.get("reward") or {}

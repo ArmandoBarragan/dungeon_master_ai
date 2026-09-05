@@ -28,7 +28,7 @@ class CharacterDTO(BaseModel):
 class PlayerActionDTO(BaseModel):
     action: CombatActionType
     roll: int
-    target_enemy_id: int | None = None
+    target_enemy_ref: str | None = None
 
 
 class EnemyActionDTO(BaseModel):

@@ -14,15 +14,19 @@ class EnemyRepository:
             self.db.refresh(enemy)
         return enemies
 
-    def get(self, enemy_id: int) -> Enemy | None:
-        return self.db.query(Enemy).filter(Enemy.id == enemy_id).first()
+    def get_by_ref(self, enemy_ref: str, encounter_id: int) -> Enemy | None:
+        return (
+            self.db.query(Enemy)
+            .filter(Enemy.ref == enemy_ref, Enemy.encounter_id == encounter_id)
+            .first()
+        )
 
     def update(self, enemy: Enemy) -> Enemy:
         self.db.flush()
         return enemy
 
-    def delete(self, enemy_id: int) -> None:
-        enemy = self.db.query(Enemy).filter(Enemy.id == enemy_id).first()
+    def delete(self, enemy_ref: str, encounter_id: int) -> None:
+        enemy = self.get_by_ref(enemy_ref, encounter_id)
         if enemy is None:
             return
         self.db.delete(enemy)

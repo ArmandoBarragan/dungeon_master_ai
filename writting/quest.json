@@ -57,7 +57,7 @@
                         {
                             "species": "Kobold",
                             "name": "Kobold",
-                            "key": "kobold",
+                            "ref": "kobold",
                             "reward": {
                                 "loot": {
                                     "gold": 1,

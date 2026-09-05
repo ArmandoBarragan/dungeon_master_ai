@@ -40,15 +40,15 @@ class SceneContext:
     enemies: list[EnemyView] = field(default_factory=list)
 
     def load_enemies(self, enemy_records: list[EnemyModel], player_turn: int) -> list[EnemyView]:
-        """Pair encounter records with their quest-defined enemy engines by key."""
-        enemies_by_key = {enemy.key: enemy for enemy in self.scene.enemies}
+        """Pair encounter records with their quest-defined enemy engines by ref."""
+        enemies_by_ref = {enemy.ref: enemy for enemy in self.scene.enemies}
         enemy_views = []
 
         for enemy_record in enemy_records:
-            engine = enemies_by_key.get(enemy_record.key)
+            engine = enemies_by_ref.get(enemy_record.ref)
             if engine is None:
                 raise ValueError(
-                    f"Enemy key '{enemy_record.key}' is not defined in scene "
+                    f"Enemy ref '{enemy_record.ref}' is not defined in scene "
                     f"'{self.scene.id}'."
                 )
             enemy_views.append(EnemyView(engine=engine, record=enemy_record))
@@ -212,12 +212,12 @@ class GameService:
         self.quest_repository.update(quest_record)
         return option.npc_response
 
-    def initiative_roll(self, quest_id: int, player_roll: int) -> list[dict[str, int]]:
+    def initiative_roll(self, quest_id: int, player_roll: int) -> list[dict[str, str]]:
         scene_context = self._get_scene_context(quest_id)        
         encounter_record = self.encounter_repository.get_current_encounter_by_quest_id(quest_id)
         if encounter_record:
             enemies = self.enemy_repository.get_enemies_by_encounter_id(encounter_record.id)
-            return [{"name": enemy.name, "id": enemy.id} for enemy in enemies]
+            return [{"name": enemy.name, "ref": enemy.ref} for enemy in enemies]
 
         encounter = self.encounter_repository.create_encounter(
             EncounterModel(
@@ -245,10 +245,10 @@ class GameService:
                 initiative_turn=i,
                 armor_class=enemy.armor_class,
                 current_hp=enemy.max_hp,
-                key=enemy.key,
+                ref=enemy.ref,
             ))
         enemy_records = self.enemy_repository.create_enemies(enemies)
-        return [{"name": enemy.name, "id": enemy.id} for enemy in enemy_records]
+        return [{"name": enemy.name, "ref": enemy.ref} for enemy in enemy_records]
 
     def enemy_actions(self, quest_id: int, first_turn: bool) -> list[EnemyActionDTO]:
         encounter_record = self.encounter_repository.get_current_encounter_by_quest_id(quest_id)
@@ -290,34 +290,40 @@ class GameService:
         
         character = self.character_repository.get_character_from_game(encounter_record.quest.game_id)
         if action.action == CombatActionType.ATTACK:
-            target_enemy = self.enemy_repository.get(action.target_enemy_id)
-            if not target_enemy or target_enemy.encounter_id != encounter_record.id:
+            target_enemy = self.enemy_repository.get_by_ref(
+                action.target_enemy_ref,
+                encounter_record.id,
+            )
+            if not target_enemy:
                 raise ValueError("Target enemy not found in the current encounter.")
             attack_roll = action.roll + character.strength
             return attack_roll > target_enemy.armor_class    
         else:
             raise NotImplementedError(f"Action {action.action} is not implemented yet.")
 
-    def damage_roll(self, quest_id: int, total_damage: int, target_enemy_id: int) -> None:
+    def damage_roll(self, quest_id: int, total_damage: int, target_enemy_ref: str) -> None:
         encounter_record = self.encounter_repository.get_current_encounter_by_quest_id(quest_id)
         if not encounter_record:
             raise ValueError("No active encounter found for this quest.")
         
         character = self.character_repository.get_character_from_game(encounter_record.quest.game_id)
-        target_enemy = self.enemy_repository.get(target_enemy_id)
+        target_enemy = self.enemy_repository.get_by_ref(
+            target_enemy_ref,
+            encounter_record.id,
+        )
         if not target_enemy:
             raise ValueError("Target enemy not found in the current encounter.")
         
         target_enemy.current_hp -= total_damage
         if target_enemy.current_hp <= 0:
-            self.enemy_repository.delete(target_enemy.id)
+            self.enemy_repository.delete(target_enemy.ref, encounter_record.id)
         else:
             self.enemy_repository.update(target_enemy)
         enemy_records = self.enemy_repository.get_enemies_by_encounter_id(encounter_record.id)
         if not enemy_records:
             encounter_record.state = EncounterStatus.SUCCEEDED.value
             self.encounter_repository.update(encounter_record)
-        return [{"name": enemy.name, "id": enemy.id} for enemy in enemy_records]
+        return [{"name": enemy.name, "ref": enemy.ref} for enemy in enemy_records]
  
     def forward_scene(self, quest_id: int) -> Scene:
         quest_record = self.quest_repository.get_quest(quest_id)
